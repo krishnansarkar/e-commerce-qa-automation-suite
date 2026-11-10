@@ -8,8 +8,16 @@
    - `page.getByPlaceholder()`
    - `page.getByText()`
 3. DO NOT hallucinate selectors. Use `playwright-cli generate-locator` or `playwright-cli snapshot` to find valid elements on the target webpage.
+
 ## Test Guidelines
 - Write tests inside the `/tests` folder using semantic role locators.
 - Execute headless via `npx playwright test`.
 - Run tests with flag --project=chromium
 - Review HTML reports on test failures.
+
+# Project Tools
+- Playwright CLI is available via `npx playwright` or `playwright-cli`.
+
+# Automation Constraints
+- Do NOT invent custom browser automation scripts.
+- Always use the `playwright-cli` command-line skill for snapshots, routing, and actions.
