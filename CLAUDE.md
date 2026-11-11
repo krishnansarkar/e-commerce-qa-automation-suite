@@ -1,5 +1,10 @@
 # Project: Playwright Testing
 
+# Website Target
+target = https://automationexercise.com
+when I refer to target, replace it with the url.
+For example, if I say go to target/login, you will go to https://automationexercise.com/login
+
 ## Locator Rules
 1. ALWAYS prioritize Playwright's semantic, accessible locators over raw CSS or XPath selectors.
 2. Order of preference:
@@ -7,12 +12,13 @@
    - `page.getByLabel()`
    - `page.getByPlaceholder()`
    - `page.getByText()`
+   - unique css selector
 3. DO NOT hallucinate selectors. Use `playwright-cli generate-locator` or `playwright-cli snapshot` to find valid elements on the target webpage.
 
 ## Test Guidelines
 - Write tests inside the `/tests` folder using semantic role locators.
 - Execute headless via `npx playwright test`.
-- Run tests with flag --project=chromium
+- Run tests with flag --project=chromium unless I explicitly say otherwise.
 - Review HTML reports on test failures.
 
 # Project Tools
