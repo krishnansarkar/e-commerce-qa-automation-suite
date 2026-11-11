@@ -21,14 +21,12 @@ export class LoginPage {
   readonly logoutLink: Locator;
 
   // Login form
-  readonly loginForm: Locator;
   readonly loginEmailInput: Locator;
   readonly loginPasswordInput: Locator;
   readonly loginButton: Locator;
   readonly loginErrorMessage: Locator;
 
   // Signup form
-  readonly signupForm: Locator;
   readonly signupNameInput: Locator;
   readonly signupEmailInput: Locator;
   readonly signupButton: Locator;
@@ -41,22 +39,18 @@ export class LoginPage {
     this.loggedInAs = page.getByText(/Logged in as/);
     this.logoutLink = page.getByRole('link', { name: 'Logout' });
 
-    // Scope each form by its heading so the duplicated "Email Address"
-    // placeholder resolves to the correct input.
-    this.loginForm = page
-      .locator('section')
-      .filter({ has: this.loginHeading });
-    this.loginEmailInput = this.loginForm.getByPlaceholder('Email Address');
-    this.loginPasswordInput = this.loginForm.getByPlaceholder('Password');
-    this.loginButton = this.loginForm.getByRole('button', { name: 'Login' });
-    this.loginErrorMessage = this.loginForm.getByText('Your email or password is incorrect!');
+    // The page has two "Email Address" placeholders (login + signup), so each
+    // form is scoped by its container class before resolving inputs.
+    const loginForm = page.locator('.login-form');
+    this.loginEmailInput = loginForm.getByPlaceholder('Email Address');
+    this.loginPasswordInput = loginForm.getByPlaceholder('Password');
+    this.loginButton = loginForm.getByRole('button', { name: 'Login' });
+    this.loginErrorMessage = loginForm.getByText('Your email or password is incorrect!');
 
-    this.signupForm = page
-      .locator('section')
-      .filter({ has: this.signupHeading });
-    this.signupNameInput = this.signupForm.getByPlaceholder('Name');
-    this.signupEmailInput = this.signupForm.getByPlaceholder('Email Address');
-    this.signupButton = this.signupForm.getByRole('button', { name: 'Signup' });
+    const signupForm = page.locator('.signup-form');
+    this.signupNameInput = signupForm.getByPlaceholder('Name');
+    this.signupEmailInput = signupForm.getByPlaceholder('Email Address');
+    this.signupButton = signupForm.getByRole('button', { name: 'Signup' });
   }
 
   /** Navigate to the login page and clear any popups/overlays. */
