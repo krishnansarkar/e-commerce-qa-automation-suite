@@ -1,5 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
-import { dismissPopups } from '../helpers/dismiss-popups.helper';
+import { dismissPopups } from '../utils/dismiss-popups';
 
 /**
  * Page object for https://automationexercise.com/login
@@ -9,7 +9,7 @@ import { dismissPopups } from '../helpers/dismiss-popups.helper';
  *
  * The site occasionally shows third-party overlays (e.g. a Google
  * consent dialog) and ad/promo popups. They are treated as noise:
- * the shared `dismissPopups()` helper clears them best-effort.
+ * `dismissPopups()` clears them best-effort and never fails a test.
  */
 export class LoginPage {
   readonly page: Page;
