@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createUserCredentials } from '../lib/data/credentials';
 import { LoginPage } from '../lib/pages/login.page';
 import { SignupPage } from '../lib/pages/signup.page';
 import { AccountCreatedPage } from '../lib/pages/account-created.page';
@@ -8,9 +9,7 @@ test.describe('Signup e2e', () => {
   test('a new user can create an account and is logged in on the homepage', async ({ page }) => {
     test.setTimeout(90_000);
 
-    const name = 'Bogus Signup User';
-    const email = `bogus.signup.${Date.now()}.${Math.random().toString(36).slice(2, 8)}@example.com`;
-    const password = 'bogus-password-123';
+    const { name, email, password } = createUserCredentials();
 
     // 1. Start from the login page and submit the "New User Signup!" form.
     const login = new LoginPage(page);
