@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { SignupPage } from '../lib/pages/signup.page';
+import { SignupPage } from '../../lib/pages/signup.page';
 
 test.describe('SignupPage POM', () => {
   const name = 'Signup POM Verifier';

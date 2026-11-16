@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { AccountCreatedPage } from '../lib/pages/account-created.page';
+import { AccountCreatedPage } from '../../lib/pages/account-created.page';
 
 test.describe('AccountCreatedPage POM', () => {
   test('goto() shows the account-created confirmation', async ({ page }) => {

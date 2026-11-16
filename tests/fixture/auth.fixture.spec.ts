@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
-import { test } from '../lib/fixtures/auth.fixture';
-import { HomePage } from '../lib/pages/home.page';
+import { test } from '../../lib/fixtures/auth.fixture';
+import { HomePage } from '../../lib/pages/home.page';
 
 test.describe('Authenticated worker fixture', () => {
   test('exposes a live account and signs the browser context in', async ({

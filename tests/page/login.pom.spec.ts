@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../lib/pages/login.page';
+import { LoginPage } from '../../lib/pages/login.page';
 
 test.describe('LoginPage POM', () => {
   test('every locator resolves to exactly one element', async ({ page }) => {
