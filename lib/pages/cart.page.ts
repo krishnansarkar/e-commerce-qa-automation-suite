@@ -139,17 +139,31 @@ export class CartPage {
   /**
    * Click "Proceed To Checkout". A guest sees the sign-in prompt modal; a
    * signed-in user is taken to /checkout.
+   *
+   * An AdSense vignette can cover the button, so a click that produces neither
+   * outcome is retried through the element's own click handler.
    */
   async proceedToCheckout(): Promise<void> {
-    await this.proceedToCheckoutButton.click();
+    const settled = (timeout: number): Promise<boolean> =>
+      Promise.race([
+        this.checkoutModal
+          .waitFor({ state: 'visible', timeout })
+          .then(() => true)
+          .catch(() => false),
+        this.page
+          .waitForURL(/\/checkout$/, { waitUntil: 'domcontentloaded', timeout })
+          .then(() => true)
+          .catch(() => false),
+      ]);
 
-    const promptShown = await this.checkoutModal
-      .waitFor({ state: 'visible', timeout: 5_000 })
-      .then(() => true)
-      .catch(() => false);
+    await this.proceedToCheckoutButton.click({ timeout: 5_000 }).catch(() => undefined);
+    if (await settled(10_000)) {
+      return;
+    }
 
-    if (!promptShown) {
-      await this.page.waitForURL(/\/checkout$/, { waitUntil: 'domcontentloaded' });
+    await this.proceedToCheckoutButton.evaluate((element) => (element as HTMLElement).click());
+    if (!(await settled(15_000))) {
+      throw new Error('Proceed To Checkout opened neither the prompt nor the checkout page.');
     }
   }
 
