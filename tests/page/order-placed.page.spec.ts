@@ -1,11 +1,18 @@
-import { expect, type Page } from '@playwright/test';
-import { test } from '../../lib/fixtures/auth.fixture';
+import { expect, mergeTests, type Page } from '@playwright/test';
+import { test as authTest } from '../../lib/fixtures/auth.fixture';
+import { test as adBlockTest } from '../../lib/fixtures/adblock.fixture';
 import { createPaymentCard } from '../../lib/data/cards';
 import { ProductsPage } from '../../lib/pages/products.page';
 import { CartPage } from '../../lib/pages/cart.page';
 import { CheckoutPage } from '../../lib/pages/checkout.page';
 import { PaymentPage } from '../../lib/pages/payment.page';
 import { OrderPlacedPage } from '../../lib/pages/order-placed.page';
+
+/**
+ * Authenticated order confirmation with ad/tracking requests aborted, which
+ * keeps the AdSense vignette from covering the checkout controls.
+ */
+const test = mergeTests(authTest, adBlockTest);
 
 /** Buy one product, place the order and pay, landing on /payment_done/<id>. */
 async function reachOrderPlaced(page: Page): Promise<void> {
@@ -26,11 +33,6 @@ async function reachOrderPlaced(page: Page): Promise<void> {
 }
 
 test.describe('OrderPlacedPage POM', () => {
-  // Reaching the confirmation page means cart, checkout and payment first.
-  test.beforeEach(() => {
-    test.setTimeout(90_000);
-  });
-
   test('confirms the order and exposes the invoice and continue links', async ({ page }) => {
     await reachOrderPlaced(page);
 

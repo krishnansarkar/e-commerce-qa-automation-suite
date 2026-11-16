@@ -1,10 +1,17 @@
-import { expect, type Page } from '@playwright/test';
-import { test } from '../../lib/fixtures/auth.fixture';
+import { expect, mergeTests, type Page } from '@playwright/test';
+import { test as authTest } from '../../lib/fixtures/auth.fixture';
+import { test as adBlockTest } from '../../lib/fixtures/adblock.fixture';
 import { createPaymentCard } from '../../lib/data/cards';
 import { ProductsPage } from '../../lib/pages/products.page';
 import { CartPage } from '../../lib/pages/cart.page';
 import { CheckoutPage } from '../../lib/pages/checkout.page';
 import { PaymentPage } from '../../lib/pages/payment.page';
+
+/**
+ * Authenticated member payment with ad/tracking requests aborted, which keeps
+ * the AdSense vignette from covering the payment controls.
+ */
+const test = mergeTests(authTest, adBlockTest);
 
 /** Buy one product and place the order, landing on /payment. */
 async function reachPayment(page: Page): Promise<void> {
@@ -22,11 +29,6 @@ async function reachPayment(page: Page): Promise<void> {
 }
 
 test.describe('PaymentPage POM', () => {
-  // Each test buys a product, checks out and pays on a slow demo site.
-  test.beforeEach(() => {
-    test.setTimeout(90_000);
-  });
-
   test('every locator resolves and the form starts empty', async ({ page }) => {
     await reachPayment(page);
 

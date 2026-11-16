@@ -1,9 +1,16 @@
-import { expect, type Page } from '@playwright/test';
-import { test } from '../../lib/fixtures/auth.fixture';
+import { expect, mergeTests, type Page } from '@playwright/test';
+import { test as authTest } from '../../lib/fixtures/auth.fixture';
+import { test as adBlockTest } from '../../lib/fixtures/adblock.fixture';
 import { createAccountForm } from '../../lib/data/account';
 import { ProductsPage } from '../../lib/pages/products.page';
 import { CartPage } from '../../lib/pages/cart.page';
 import { CheckoutPage } from '../../lib/pages/checkout.page';
+
+/**
+ * Authenticated member checkout with ad/tracking requests aborted, which keeps
+ * the AdSense vignette from covering the checkout controls.
+ */
+const test = mergeTests(authTest, adBlockTest);
 
 /** Fill the cart through the listing, then continue to checkout as a member. */
 async function reachCheckout(page: Page, ...products: string[]): Promise<void> {
@@ -21,11 +28,6 @@ async function reachCheckout(page: Page, ...products: string[]): Promise<void> {
 }
 
 test.describe('CheckoutPage POM', () => {
-  // Cart -> checkout -> payment is several navigations on a slow demo site.
-  test.beforeEach(() => {
-    test.setTimeout(90_000);
-  });
-
   test('goto() shows the account addresses and the order review', async ({ page, auth }) => {
     await reachCheckout(page, 'Blue Top', 'Men Tshirt');
 

@@ -1,5 +1,6 @@
-import { expect } from '@playwright/test';
-import { test } from '../lib/fixtures/auth.fixture';
+import { expect, mergeTests } from '@playwright/test';
+import { test as authTest } from '../lib/fixtures/auth.fixture';
+import { test as adBlockTest } from '../lib/fixtures/adblock.fixture';
 import { HomePage } from '../lib/pages/home.page';
 import { LoginPage } from '../lib/pages/login.page';
 
@@ -9,13 +10,14 @@ import { LoginPage } from '../lib/pages/login.page';
  * The auth fixture registers a real account per worker and signs the worker's
  * browser context in. These tests exercise the login form itself, so every test
  * starts from a logged-out context while still reusing the fixture's account.
+ * Ads are blocked so the site's overlays cannot cover the form.
  */
+const test = mergeTests(authTest, adBlockTest);
+
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe('Login e2e', () => {
   test('a registered user can log in with valid credentials', async ({ page, auth }) => {
-    test.setTimeout(90_000);
-
     // 1. A guest lands on the homepage with the signed-out header.
     const home = new HomePage(page);
     await home.goto();
