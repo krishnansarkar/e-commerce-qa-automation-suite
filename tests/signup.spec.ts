@@ -11,13 +11,18 @@ test.describe('Signup e2e', () => {
 
     const { name, email, password } = createUserCredentials();
 
-    // 1. Start from the login page and submit the "New User Signup!" form.
+    // 1. Start as a guest on the homepage and open the login page from the header.
+    const home = new HomePage(page);
+    await home.goto();
+    await expect(home.signupLoginLink).toBeVisible();
+    await home.openLogin();
+
+    // 2. Submit the "New User Signup!" form.
     const login = new LoginPage(page);
-    await login.goto();
     await expect(login.signupHeading).toBeVisible();
     await login.signup(name, email);
 
-    // 2. Complete the "Enter Account Information" form with bogus details.
+    // 3. Complete the "Enter Account Information" form with bogus details.
     const signup = new SignupPage(page);
     await expect(page).toHaveURL(/\/signup$/);
     await expect(signup.accountInformationHeading).toBeVisible();
@@ -49,16 +54,15 @@ test.describe('Signup e2e', () => {
 
     await signup.createAccount();
 
-    // 3. The account is created and the confirmation page is shown.
+    // 4. The account is created and the confirmation page is shown.
     const accountCreated = new AccountCreatedPage(page);
     await expect(page).toHaveURL(/\/account_created/);
     await expect(accountCreated.heading).toBeVisible();
     await expect(accountCreated.confirmationMessage).toBeVisible();
 
-    // 4. Continue to the homepage, where the header reflects the new session.
+    // 5. Continue to the homepage, where the header reflects the new session.
     await accountCreated.continueToHomepage();
 
-    const home = new HomePage(page);
     await expect(page).toHaveURL(/^https:\/\/automationexercise\.com\/$/);
     await expect(home.loggedInAs).toBeVisible();
     await expect(home.loggedInAs).toContainText(`Logged in as ${name}`);
@@ -66,7 +70,7 @@ test.describe('Signup e2e', () => {
     await expect(home.deleteAccountLink).toBeVisible();
     await expect(home.signupLoginLink).toHaveCount(0);
 
-    // 5. The nav bar identifies the newly created account.
+    // 6. The nav bar identifies the newly created account.
     expect(await home.isLoggedIn()).toBe(true);
     expect(await home.loggedInUser()).toBe(name);
   });

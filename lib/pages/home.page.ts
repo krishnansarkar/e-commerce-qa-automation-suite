@@ -62,6 +62,14 @@ export class HomePage {
     await dismissPopups(this.page);
   }
 
+  /** Open the login page via the header's "Signup / Login" link. */
+  async openLogin(): Promise<void> {
+    await dismissPopups(this.page);
+    await this.signupLoginLink.click();
+    await this.page.waitForURL(/\/login$/);
+    await dismissPopups(this.page);
+  }
+
   /** True when the header shows the signed-in account links. */
   async isLoggedIn(): Promise<boolean> {
     return this.loggedInAs.isVisible().catch(() => false);
