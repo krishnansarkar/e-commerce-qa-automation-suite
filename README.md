@@ -68,7 +68,7 @@ Google's consent prompt, which otherwise cover the page and intercept clicks on 
 
 ## Improvements:
 
-### Long timeouts replaced with ad blocking
+### Long timeouts replaced with ad blocking fixture
 
 An earlier AI-generated version of these specs bumped per-test timeouts to **90 seconds** so the
 slow, ad-covered flows could still finish. That workaround has been steered: ads are now handled
