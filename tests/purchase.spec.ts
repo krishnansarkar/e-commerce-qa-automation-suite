@@ -5,7 +5,6 @@ import { test as adBlockTest } from '../lib/fixtures/adblock.fixture';
 import { createAccountForm } from '../lib/data/account';
 import { createPaymentCard } from '../lib/data/cards';
 import { HomePage } from '../lib/pages/home.page';
-import { ProductsPage } from '../lib/pages/products.page';
 import { CartPage } from '../lib/pages/cart.page';
 import { CheckoutPage } from '../lib/pages/checkout.page';
 import { PaymentPage } from '../lib/pages/payment.page';
@@ -24,15 +23,14 @@ test.describe('Purchase e2e', () => {
   }) => {
     const account = createAccountForm(auth.account);
 
-    // 1. Start on the homepage and add the product from its featured grid. The
-    //    homepage reuses the /products card markup, so the products page object
-    //    works there without navigating to /products.
+    // 1. Start on the homepage and add the product from its featured grid. Its
+    //    cards share the product component with /products, so the same
+    //    add-to-cart flow works without navigating away.
     const home = new HomePage(page);
     await home.goto();
 
-    const catalog = new ProductsPage(page);
-    await catalog.addToCart('Blue Top');
-    await catalog.continueShopping();
+    await home.productsNav.addToCart('Blue Top');
+    await home.productsNav.continueShopping();
 
     // 2. Cart: the product is there and the total is correct. Keep the total;
     //    the invoice must report the same amount.

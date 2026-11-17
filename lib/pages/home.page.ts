@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+import { ProductsNavComponent } from '../components/products-nav.component';
 
 /**
  * Page object for https://automationexercise.com/ (homepage).
@@ -6,9 +7,15 @@ import { type Locator, type Page } from '@playwright/test';
  * The header is session-aware: guests see "Signup / Login", while signed-in
  * users see "Logout", "Delete Account" and a "Logged in as <name>" label.
  * Both states are modelled here so tests can assert which one is active.
+ *
+ * The "Features Items" grid renders the same product cards as /products, so
+ * their interactions live in `ProductsNavComponent`, exposed as `productsNav`.
  */
 export class HomePage {
   readonly page: Page;
+
+  /** Product cards and the "Added!" modal, shared with the products page. */
+  readonly productsNav: ProductsNavComponent;
 
   // Header / navigation
   readonly header: Locator;
@@ -31,6 +38,8 @@ export class HomePage {
 
   constructor(page: Page) {
     this.page = page;
+
+    this.productsNav = new ProductsNavComponent(page);
 
     this.header = page.getByRole('banner');
     this.logo = this.header.getByRole('img');
