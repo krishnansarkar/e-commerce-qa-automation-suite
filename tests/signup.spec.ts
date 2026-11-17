@@ -1,10 +1,10 @@
 import { expect } from '@playwright/test';
-import { test } from '../../lib/fixtures/adblock.fixture';
-import { createUserCredentials } from '../../lib/data/credentials';
-import { LoginPage } from '../../lib/pages/login.page';
-import { SignupPage } from '../../lib/pages/signup.page';
-import { AccountCreatedPage } from '../../lib/pages/account-created.page';
-import { HomePage } from '../../lib/pages/home.page';
+import { test } from '../lib/fixtures/adblock.fixture';
+import { createUserCredentials } from '../lib/data/credentials';
+import { LoginPage } from '../lib/pages/login.page';
+import { SignupPage } from '../lib/pages/signup.page';
+import { AccountCreatedPage } from '../lib/pages/account-created.page';
+import { HomePage } from '../lib/pages/home.page';
 
 test.describe('Signup e2e', () => {
   test('a new user can create an account and is logged in on the homepage', async ({ page }) => {

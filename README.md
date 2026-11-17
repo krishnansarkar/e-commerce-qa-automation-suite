@@ -33,14 +33,12 @@ with retries.
 ```
 tests/
   api/        API contracts (*.api.spec.ts) - run by the `api` project
-  page/       one spec per page object (*.page.spec.ts)
-  fixture/    specs for the fixtures themselves
-  e2e/        cross-page end-to-end flows (login, signup)
+  *.spec.ts   cross-page end-to-end flows (login, signup)
 lib/
   pages/      page object models
   fixtures/   auth and ad-blocking fixtures
   data/       test data factories (credentials, account form, payment card)
-  utils/      shared helpers (popup dismissal, click-through-overlay navigation)
+  utils/      shared helper for clicking through ad overlays
 ```
 
 Browser specs drive the site through the page objects (`lib/pages`) rather than raw selectors.
@@ -74,5 +72,5 @@ Google's consent prompt, which otherwise cover the page and intercept clicks on 
 An earlier AI-generated version of these specs bumped per-test timeouts to **90 seconds** so the
 slow, ad-covered flows could still finish. That workaround has been steered: ads are now handled
 up front through an `adblock` fixture, which intercepts requests with a route and aborts the ad/tracking
-hosts. The affected specs now complete inside the
+hosts. The e2e specs now run inside the
 default 30-second budget.

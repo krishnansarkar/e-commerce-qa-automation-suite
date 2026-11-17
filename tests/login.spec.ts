@@ -1,8 +1,8 @@
 import { expect, mergeTests } from '@playwright/test';
-import { test as authTest } from '../../lib/fixtures/auth.fixture';
-import { test as adBlockTest } from '../../lib/fixtures/adblock.fixture';
-import { HomePage } from '../../lib/pages/home.page';
-import { LoginPage } from '../../lib/pages/login.page';
+import { test as authTest } from '../lib/fixtures/auth.fixture';
+import { test as adBlockTest } from '../lib/fixtures/adblock.fixture';
+import { HomePage } from '../lib/pages/home.page';
+import { LoginPage } from '../lib/pages/login.page';
 
 /**
  * Login e2e.
