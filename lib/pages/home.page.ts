@@ -1,5 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import { dismissPopups } from '../utils/dismiss-popups';
 
 /**
  * Page object for https://automationexercise.com/ (homepage).
@@ -54,20 +53,17 @@ export class HomePage {
     this.subscriptionHeading = page.getByRole('heading', { name: 'Subscription', level: 2 });
   }
 
-  /** Navigate to the homepage and clear any popups/overlays. */
+  /** Navigate to the homepage. */
   async goto(): Promise<void> {
     await this.page.goto('https://automationexercise.com/', {
       waitUntil: 'domcontentloaded',
     });
-    await dismissPopups(this.page);
   }
 
   /** Open the login page via the header's "Signup / Login" link. */
   async openLogin(): Promise<void> {
-    await dismissPopups(this.page);
     await this.signupLoginLink.click();
     await this.page.waitForURL(/\/login$/);
-    await dismissPopups(this.page);
   }
 
   /** True when the header shows the signed-in account links. */
@@ -86,7 +82,6 @@ export class HomePage {
 
   /** Sign out via the header link. */
   async logout(): Promise<void> {
-    await dismissPopups(this.page);
     await this.logoutLink.click();
     await this.page.waitForURL(/\/login$/);
   }

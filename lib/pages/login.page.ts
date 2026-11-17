@@ -1,5 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import { dismissPopups } from '../utils/dismiss-popups';
 
 /**
  * Page object for https://automationexercise.com/login
@@ -7,9 +6,8 @@ import { dismissPopups } from '../utils/dismiss-popups';
  * The page contains both the "Login to your account" and the
  * "New User Signup!" forms, so both are modelled here.
  *
- * The site occasionally shows third-party overlays (e.g. a Google
- * consent dialog) and ad/promo popups. They are treated as noise:
- * `dismissPopups()` clears them best-effort and never fails a test.
+ * The specs that use this page object run with the ad-blocking fixture, so the
+ * site's ad and consent overlays never render here.
  */
 export class LoginPage {
   readonly page: Page;
@@ -53,17 +51,15 @@ export class LoginPage {
     this.signupButton = signupForm.getByRole('button', { name: 'Signup' });
   }
 
-  /** Navigate to the login page and clear any popups/overlays. */
+  /** Navigate to the login page. */
   async goto(): Promise<void> {
     await this.page.goto('https://automationexercise.com/login', {
       waitUntil: 'domcontentloaded',
     });
-    await dismissPopups(this.page);
   }
 
   /** Submit the login form with the given credentials. */
   async login(email: string, password: string): Promise<void> {
-    await dismissPopups(this.page);
     await this.loginEmailInput.fill(email);
     await this.loginPasswordInput.fill(password);
     await this.loginButton.click();
@@ -71,7 +67,6 @@ export class LoginPage {
 
   /** Submit the "New User Signup!" form. */
   async signup(name: string, email: string): Promise<void> {
-    await dismissPopups(this.page);
     await this.signupNameInput.fill(name);
     await this.signupEmailInput.fill(email);
     await this.signupButton.click();

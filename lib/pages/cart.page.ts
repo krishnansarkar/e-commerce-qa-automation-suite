@@ -1,5 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import { dismissPopups } from '../utils/dismiss-popups';
 
 /** How long a cart click may take to register before it is retried. */
 const CLICK_SETTLE_MS = 5_000;
@@ -25,9 +24,6 @@ const CLICK_SETTLE_MS = 5_000;
  *   href-less anchors for the same reason.
  * - Guests get the `#checkoutModal` prompt; signed-in users are redirected
  *   straight to /checkout.
- * - `#checkoutModal` matches `dismissPopups()` (`.modal.show` with a
- *   `[data-dismiss="modal"]` button), so do not call it between opening the
- *   prompt and asserting on it.
  */
 export class CartPage {
   readonly page: Page;
@@ -61,12 +57,11 @@ export class CartPage {
     this.continueOnCartButton = this.checkoutModal.getByRole('button', { name: 'Continue On Cart' });
   }
 
-  /** Navigate to the cart and clear any popups/overlays. */
+  /** Navigate to the cart. */
   async goto(): Promise<void> {
     await this.page.goto('https://automationexercise.com/view_cart', {
       waitUntil: 'domcontentloaded',
     });
-    await dismissPopups(this.page);
   }
 
   /** The table row for a product, matched on its name link. */

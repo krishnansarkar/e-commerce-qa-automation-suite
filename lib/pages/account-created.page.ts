@@ -1,12 +1,10 @@
 import { type Locator, type Page } from '@playwright/test';
-import { dismissPopups } from '../utils/dismiss-popups';
 
 /**
  * Page object for https://automationexercise.com/account_created
  *
  * Success page shown after submitting the "Enter Account Information" form.
- * It is reachable directly by URL, but in a real flow it is reached from
- * `SignupPage.createAccount()`.
+ * In a real flow it is reached from `SignupPage.createAccount()`.
  *
  * Notes on the site's behaviour:
  * - The header still shows "Signup / Login" on this page; the logged-in nav
@@ -32,17 +30,8 @@ export class AccountCreatedPage {
     this.continueLink = page.getByRole('link', { name: 'Continue' });
   }
 
-  /** Navigate to the account-created page and clear any popups/overlays. */
-  async goto(): Promise<void> {
-    await this.page.goto('https://automationexercise.com/account_created', {
-      waitUntil: 'domcontentloaded',
-    });
-    await dismissPopups(this.page);
-  }
-
   /** Click "Continue" and land on the homepage. */
   async continueToHomepage(): Promise<void> {
-    await dismissPopups(this.page);
     await this.continueLink.click();
 
     // Normally the click navigates to "/", but an ad vignette can pin the page
@@ -62,6 +51,5 @@ export class AccountCreatedPage {
       });
     }
 
-    await dismissPopups(this.page);
   }
 }

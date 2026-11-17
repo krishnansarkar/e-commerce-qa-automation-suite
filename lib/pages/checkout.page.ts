@@ -1,5 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import { dismissPopups } from '../utils/dismiss-popups';
 import { clickAndNavigate } from '../utils/click-and-navigate';
 
 /**
@@ -7,8 +6,9 @@ import { clickAndNavigate } from '../utils/click-and-navigate';
  *
  * The one-page checkout shown to signed-in users: delivery and billing
  * addresses, a read-only review of the order, an optional comment box and a
- * "Place Order" action. Reached from `CartPage.proceedToCheckout()`; guests are
- * sent to /login instead, so this page is only meaningful with a session.
+ * "Place Order" action. Reached from `CartPage.proceedToCheckout()`; a guest is
+ * stopped by the cart's sign-in prompt instead, so this page is only meaningful
+ * with a session (a direct GET renders an empty review table).
  *
  * Notes on the site's markup:
  * - The addresses are plain `<ul>` lists (`#address_delivery`, `#address_invoice`)
@@ -63,14 +63,6 @@ export class CheckoutPage {
     this.placeOrderLink = page.getByRole('link', { name: 'Place Order' });
   }
 
-  /** Navigate to the checkout page and clear any popups/overlays. */
-  async goto(): Promise<void> {
-    await this.page.goto('https://automationexercise.com/checkout', {
-      waitUntil: 'domcontentloaded',
-    });
-    await dismissPopups(this.page);
-  }
-
   /** The review row for a product, matched on its name link. */
   rowFor(name: string): Locator {
     return this.productRows.filter({ has: this.page.getByRole('link', { name }) });
@@ -103,7 +95,6 @@ export class CheckoutPage {
 
   /** Place the order and land on the payment page. */
   async placeOrder(): Promise<void> {
-    await dismissPopups(this.page);
     await clickAndNavigate(this.page, this.placeOrderLink, /\/payment$/);
   }
 }

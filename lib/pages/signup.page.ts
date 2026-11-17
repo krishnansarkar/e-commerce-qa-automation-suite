@@ -1,6 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import { dismissPopups } from '../utils/dismiss-popups';
-import { LoginPage } from './login.page';
 
 /** Title options offered by the account form. */
 export type Title = 'Mr.' | 'Mrs.';
@@ -37,8 +35,8 @@ export interface SignupAddress {
  *
  * This is the "Enter Account Information" page reached after submitting the
  * "New User Signup!" form on /login. It cannot be opened by URL alone because
- * the form is pre-populated from the name/email POSTed by the login page, so
- * `goto()` performs that step first.
+ * the form is pre-populated from the name/email POSTed by the login page, so it
+ * is reached through `LoginPage.signup()`.
  *
  * Notes on the site's markup:
  * - Required fields are labelled with a trailing " *", and Playwright's
@@ -118,18 +116,6 @@ export class SignupPage {
     this.createAccountButton = page.getByRole('button', { name: 'Create Account' });
   }
 
-  /**
-   * Reach this page the way a user does: open /login, then submit the
-   * "New User Signup!" form with the given name and email.
-   */
-  async goto(name: string, email: string): Promise<void> {
-    const login = new LoginPage(this.page);
-    await login.goto();
-    await login.signup(name, email);
-    await this.page.waitForURL(/\/signup$/);
-    await dismissPopups(this.page);
-  }
-
   /** Select the title radio ("Mr." or "Mrs."). */
   async selectTitle(title: Title): Promise<void> {
     const radio = title === 'Mr.' ? this.titleMrRadio : this.titleMrsRadio;
@@ -138,7 +124,6 @@ export class SignupPage {
 
   /** Fill the account section: title, password, date of birth and opt-ins. */
   async fillAccountInformation(details: SignupPersonalDetails): Promise<void> {
-    await dismissPopups(this.page);
 
     if (details.title) {
       await this.selectTitle(details.title);
@@ -188,7 +173,6 @@ export class SignupPage {
 
   /** Submit the form. Creates a real account on the site. */
   async createAccount(): Promise<void> {
-    await dismissPopups(this.page);
     await this.createAccountButton.click();
   }
 }

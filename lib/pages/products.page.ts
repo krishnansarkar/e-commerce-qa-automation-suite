@@ -1,5 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import { dismissPopups } from '../utils/dismiss-popups';
 
 /** How long a cart click may take to register before it is retried. */
 const CLICK_SETTLE_MS = 5_000;
@@ -22,9 +21,8 @@ export type Category = 'Women' | 'Men' | 'Kids';
  * - "Add to cart" is an `<a>` without an `href`, so it has no link role and is
  *   addressed through its `.add-to-cart` class instead.
  * - Adding to cart is an AJAX call; on success the site shows the "Added!"
- *   modal (`#cartModal`). That modal matches `dismissPopups()` (`.modal.show`
- *   with a `[data-dismiss="modal"]` button), so do not call it between adding a
- *   product and asserting on the modal.
+ *   modal (`#cartModal`), which covers the listing until it is dismissed with
+ *   "Continue Shopping".
  * - Category links are Bootstrap collapse toggles: the items are in the DOM but
  *   hidden until the category is expanded.
  * - Brand links carry the product count in their accessible name (e.g. "(6)Polo"),
@@ -72,12 +70,11 @@ export class ProductsPage {
     });
   }
 
-  /** Navigate to the products page and clear any popups/overlays. */
+  /** Navigate to the products page. */
   async goto(): Promise<void> {
     await this.page.goto('https://automationexercise.com/products', {
       waitUntil: 'domcontentloaded',
     });
-    await dismissPopups(this.page);
   }
 
   /**
@@ -86,14 +83,12 @@ export class ProductsPage {
    * Products" grid.
    */
   async search(term: string): Promise<void> {
-    await dismissPopups(this.page);
     await this.searchInput.fill(term);
     await this.searchButton.click();
     await this.page.waitForURL(
       (url) => url.pathname === '/products' && url.searchParams.get('search') === term,
       { waitUntil: 'domcontentloaded' },
     );
-    await dismissPopups(this.page);
   }
 
   /** The card for a product, matched on its name. */
@@ -166,7 +161,6 @@ export class ProductsPage {
   async viewProduct(name: string): Promise<void> {
     await this.cardFor(name).getByRole('link', { name: 'View Product' }).click();
     await this.page.waitForURL(/\/product_details\/\d+$/, { waitUntil: 'domcontentloaded' });
-    await dismissPopups(this.page);
   }
 
   /** The accordion panel for a top-level category. */
@@ -195,9 +189,7 @@ export class ProductsPage {
 
   /** Filter the catalogue by opening a brand's page. */
   async openBrand(brand: string): Promise<void> {
-    await dismissPopups(this.page);
     await this.brandLink(brand).click();
     await this.page.waitForURL(/\/brand_products\//, { waitUntil: 'domcontentloaded' });
-    await dismissPopups(this.page);
   }
 }
