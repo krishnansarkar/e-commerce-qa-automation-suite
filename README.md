@@ -33,15 +33,16 @@ with retries.
 ```
 tests/
   api/        API contracts (*.api.spec.ts) - run by the `api` project
-  *.spec.ts   cross-page end-to-end flows (login, signup)
+  *.spec.ts   cross-page end-to-end flows (login, signup, purchase)
 lib/
   pages/      page object models
   fixtures/   auth and ad-blocking fixtures
+  components/ shared component objects (product cards, add-to-cart modal)
   data/       test data factories (credentials, account form, payment card)
   utils/      shared helper for clicking through ad overlays
 ```
 
-Browser specs drive the site through the page objects (`lib/pages`) rather than raw selectors.
+Browser specs drive the site through the page objects (`lib/pages`) and their shared components (`lib/components`) rather than raw selectors.
 Each page object documents the markup quirks it works around in its class-level comment.
 
 ## Fixtures
@@ -74,3 +75,12 @@ slow, ad-covered flows could still finish. That workaround has been steered: ads
 up front through an `adblock` fixture, which intercepts requests with a route and aborts the ad/tracking
 hosts. The e2e specs now run inside the
 default 30-second budget.
+
+### Shared product component instead of reaching across pages
+
+The first AI-generated version of the purchase test used the products page object to find and add a
+product while the browser was still on the homepage - it only worked because both pages happen to
+render the same markup, and it tied a homepage step to a page object for a page the test never
+visited. I steered it to extract the common product-card elements and add-to-cart behaviour into
+`lib/components/products-nav.component.ts`. `HomePage` and `ProductsPage` now both compose that
+component, and the purchase test uses purely the homepage for that step.
