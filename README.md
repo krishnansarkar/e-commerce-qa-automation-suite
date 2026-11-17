@@ -35,7 +35,7 @@ tests/
   api/        API contracts (*.api.spec.ts) - run by the `api` project
   page/       one spec per page object (*.page.spec.ts)
   fixture/    specs for the fixtures themselves
-  *.spec.ts   cross-page end-to-end flows (login, signup)
+  e2e/        cross-page end-to-end flows (login, signup)
 lib/
   pages/      page object models
   fixtures/   auth and ad-blocking fixtures
