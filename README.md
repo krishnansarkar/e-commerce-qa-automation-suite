@@ -38,8 +38,8 @@ lib/
   pages/      page object models
   fixtures/   auth and ad-blocking fixtures
   components/ shared component objects (product cards, add-to-cart modal)
-  data/       test data factories (credentials, account form, payment card)
-  utils/      shared helper for clicking through ad overlays
+  data/       test data factories (user, payment card)
+  utils/      shared helpers
 ```
 
 Browser specs drive the site through the page objects (`lib/pages`) and their shared components (`lib/components`) rather than raw selectors.
@@ -51,7 +51,8 @@ Each page object documents the markup quirks it works around in its class-level 
 
 Registers a real account through the API once per worker, signs that session in, exposes it as the
 worker's `storageState`, and deletes the account on teardown. Tests that need a signed-in user just
-request the `auth` fixture; `auth.account` holds the credentials.
+request the `auth` fixture; `auth.account` holds the generated user (credentials plus account
+information).
 
 ### `adblock` - `lib/fixtures/adblock.fixture.ts`
 
@@ -70,11 +71,11 @@ Google's consent prompt, which otherwise cover the page and intercept clicks on 
 
 ### Long timeouts replaced with ad blocking fixture
 
-An earlier AI-generated version of these specs bumped per-test timeouts to **90 seconds** so the
-slow, ad-covered flows could still finish. That workaround has been steered: ads are now handled
-up front through an `adblock` fixture, which intercepts requests with a route and aborts the ad/tracking
-hosts. The e2e specs now run inside the
-default 30-second budget.
+An earlier AI-generated version of these specs bumped per-test timeouts to **90 seconds** and
+inserted timeouts on page clicks so the slow, ad-covered flows could still finish. That workaround
+has been steered: ads are now handled up front through an `adblock` fixture, which intercepts
+requests and aborts the ad/tracking hosts. The e2e specs now run inside the default 30-second
+budget.
 
 ### Shared product component instead of reaching across pages
 
@@ -84,3 +85,11 @@ render the same markup, and it tied a homepage step to a page object for a page 
 visited. I steered it to extract the common product-card elements and add-to-cart behaviour into
 `lib/components/products-nav.component.ts`. `HomePage` and `ProductsPage` now both compose that
 component, and the purchase test uses purely the homepage for that step.
+
+### Auth fixture carries the whole account, not just credentials
+
+An early AI-generated version of the auth fixture originally generated login credentials only,
+so a signed-in test that needed address details had to rebuild the account form from a second factory
+right before posting it. That meant one logical user was assembled from two unrelated modules
+at every call site. I corrected this by combining the factories into a single `lib/data/user.ts`
+and updating types appropriately.
