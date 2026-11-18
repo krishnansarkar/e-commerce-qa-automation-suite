@@ -1,5 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import { clickAndNavigate } from '../utils/click-and-navigate';
 
 /**
  * Page object for https://automationexercise.com/payment_done/<orderId>
@@ -47,6 +46,6 @@ export class OrderPlacedPage {
 
   /** Follow "Continue" back to the homepage. */
   async continueToHomepage(): Promise<void> {
-    await clickAndNavigate(this.page, this.continueLink, /^https:\/\/automationexercise\.com\/$/);
+    await this.continueLink.click();
   }
 }

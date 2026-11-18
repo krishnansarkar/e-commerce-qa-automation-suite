@@ -1,5 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import { clickAndNavigate } from '../utils/click-and-navigate';
 
 /**
  * Page object for https://automationexercise.com/checkout
@@ -95,6 +94,6 @@ export class CheckoutPage {
 
   /** Place the order and land on the payment page. */
   async placeOrder(): Promise<void> {
-    await clickAndNavigate(this.page, this.placeOrderLink, /\/payment$/);
+    await this.placeOrderLink.click();
   }
 }

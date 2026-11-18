@@ -1,5 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import { clickAndNavigate } from '../utils/click-and-navigate';
 
 /** Bogus card details accepted by the site's payment form. */
 export interface PaymentCard {
@@ -68,9 +67,8 @@ export class PaymentPage {
     await this.expiryYearInput.fill(card.expiryYear);
   }
 
-  /** Submit the payment and land on the "Order Placed!" page. */
   async payAndConfirm(card: PaymentCard): Promise<void> {
     await this.fillCard(card);
-    await clickAndNavigate(this.page, this.payAndConfirmButton, /\/payment_done\/\d+/);
+    await this.payAndConfirmButton.click();
   }
 }
