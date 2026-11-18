@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createAccountForm } from '../../lib/data/account';
-import { createUserCredentials } from '../../lib/data/credentials';
+import { createUser } from '../../lib/data/user';
 
 /**
  * Register API: POST /api/createAccount
@@ -11,12 +10,12 @@ import { createUserCredentials } from '../../lib/data/credentials';
  */
 test.describe('Register API', () => {
   test('creates a new user account', async ({ request }) => {
-    const account = createUserCredentials();
+    const account = createUser();
     const { email, password } = account;
 
     try {
       const response = await request.post('/api/createAccount', {
-        form: createAccountForm(account),
+        form: account,
       });
 
       expect(response.status()).toBe(200);

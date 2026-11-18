@@ -1,4 +1,11 @@
-import type { UserCredentials } from './credentials';
+/**
+ * Test data factory for users: account details plus login credentials.
+ *
+ * Emails must be unique per run because automationexercise.com rejects
+ * sign-ups with an address that already has an account. The generated email
+ * combines a timestamp with random/counter values so parallel workers cannot
+ * collide.
+ */
 
 /**
  * Form body accepted by POST /api/createAccount.
@@ -10,10 +17,8 @@ import type { UserCredentials } from './credentials';
  * Playwright's `form` option (`{ [key: string]: string | number | boolean }`):
  * interfaces have no implicit index signature, type aliases do.
  */
-export type CreateAccountForm = {
+export type AccountInfo = {
   name: string;
-  email: string;
-  password: string;
   title: string;
   birth_date: string;
   birth_month: string;
@@ -30,12 +35,10 @@ export type CreateAccountForm = {
   mobile_number: string;
 };
 
-/** Build a complete create-account body from generated credentials. */
-export function createAccountForm(account: UserCredentials): CreateAccountForm {
+/** Build a complete create-account body. */
+export function createAccountInfo(): AccountInfo {
   return {
-    name: account.name,
-    email: account.email,
-    password: account.password,
+    name: 'Bogus Tester',
     title: 'Mrs',
     birth_date: '15',
     birth_month: '1',
@@ -51,4 +54,32 @@ export function createAccountForm(account: UserCredentials): CreateAccountForm {
     city: 'Nowhere',
     mobile_number: '555-0100',
   };
+}
+
+export type UserCredentials = {
+  email: string;
+  password: string;
+}
+
+export type GeneratedUser = UserCredentials & AccountInfo;
+
+let sequence = 0;
+
+function createCredentials(): UserCredentials {
+  return {
+    email: `bogus.signup.${Date.now()}.${sequence++}.${Math.random()
+      .toString(36)
+      .slice(2, 8)}@example.com`,
+    password: 'bogus-password-123',
+  };
+}
+
+export function createUser(overrides: Partial<GeneratedUser> = {}): GeneratedUser {
+  const account: GeneratedUser = {
+    ...createCredentials(),
+    ...createAccountInfo(),
+    ...overrides,
+  };
+
+  return account;
 }

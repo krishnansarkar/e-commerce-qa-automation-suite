@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { test } from '../lib/fixtures/adblock.fixture';
-import { createUserCredentials } from '../lib/data/credentials';
+import { createUser } from '../lib/data/user';
 import { LoginPage } from '../lib/pages/login.page';
 import { SignupPage } from '../lib/pages/signup.page';
 import { AccountCreatedPage } from '../lib/pages/account-created.page';
@@ -8,7 +8,7 @@ import { HomePage } from '../lib/pages/home.page';
 
 test.describe('Signup e2e', () => {
   test('a new user can create an account and is logged in on the homepage', async ({ page }) => {
-    const { name, email, password } = createUserCredentials();
+    const { name, email, password } = createUser();
 
     // 1. Start as a guest on the homepage and open the login page from the header.
     const home = new HomePage(page);

@@ -2,7 +2,6 @@ import { readFile } from 'node:fs/promises';
 import { expect, mergeTests } from '@playwright/test';
 import { test as authTest } from '../lib/fixtures/auth.fixture';
 import { test as adBlockTest } from '../lib/fixtures/adblock.fixture';
-import { createAccountForm } from '../lib/data/account';
 import { createPaymentCard } from '../lib/data/cards';
 import { HomePage } from '../lib/pages/home.page';
 import { CartPage } from '../lib/pages/cart.page';
@@ -21,7 +20,7 @@ test.describe('Purchase e2e', () => {
     page,
     auth,
   }) => {
-    const account = createAccountForm(auth.account);
+    const account = auth.account;
 
     // 1. Start on the homepage and add the product from its featured grid. Its
     //    cards share the product component with /products, so the same
@@ -76,7 +75,6 @@ test.describe('Purchase e2e', () => {
 
     const payment = new PaymentPage(page);
     await payment.payAndConfirm(createPaymentCard());
-
     const done = new OrderPlacedPage(page);
     await expect(page).toHaveURL(/\/payment_done\/\d+$/);
     await expect(done.heading).toBeVisible();
@@ -89,6 +87,7 @@ test.describe('Purchase e2e', () => {
       page.waitForEvent('download'),
       done.downloadInvoiceLink.click(),
     ]);
+
     expect(await download.failure()).toBeNull();
     expect(download.suggestedFilename()).toBe('invoice.txt');
 

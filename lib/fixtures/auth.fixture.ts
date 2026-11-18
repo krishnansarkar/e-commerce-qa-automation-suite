@@ -4,23 +4,22 @@ import {
   type BrowserContextOptions,
 } from '@playwright/test';
 import { BASE_URL } from '../config';
-import { createAccountForm } from '../data/account';
-import { createUserCredentials, type UserCredentials } from '../data/credentials';
+import { createUser, type GeneratedUser, type UserCredentials } from '../data/user';
 
 /** The in-memory form of a storage state (not a file path). */
 type StorageState = Exclude<BrowserContextOptions['storageState'], string | undefined>;
 
 /** The account and browser storage state shared by every test in a worker. */
 export interface AuthSession {
-  account: UserCredentials;
+  account: GeneratedUser;
   /** Cookies captured after logging in; assignable to `use.storageState`. */
   storageState: StorageState;
 }
 
 /** Register a real account through the API. */
-async function register(request: APIRequestContext, account: UserCredentials): Promise<void> {
+async function register(request: APIRequestContext, account: GeneratedUser): Promise<void> {
   const response = await request.post('/api/createAccount', {
-    form: createAccountForm(account),
+    form: account,
   });
   const body = (await response.json()) as { responseCode: number; message: string };
 
@@ -74,7 +73,7 @@ export const test = base.extend<{ storageState: StorageState }, { auth: AuthSess
   auth: [
     async ({ playwright }, use) => {
       const request = await playwright.request.newContext({ baseURL: BASE_URL });
-      const account = createUserCredentials();
+      const account = createUser();
 
       try {
         await register(request, account);
