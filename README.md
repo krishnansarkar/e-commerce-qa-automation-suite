@@ -33,7 +33,7 @@ with retries.
 ```
 tests/
   api/        API contracts (*.api.spec.ts) - run by the `api` project
-  *.spec.ts   cross-page end-to-end flows (login, signup, purchase)
+  *.spec.ts   cross-page end-to-end flows (login, logout, signup, purchase)
 lib/
   pages/      page object models
   fixtures/   auth and ad-blocking fixtures
@@ -93,3 +93,10 @@ so a signed-in test that needed address details had to rebuild the account form 
 right before posting it. That meant one logical user was assembled from two unrelated modules
 at every call site. I corrected this by combining the factories into a single `lib/data/user.ts`
 and updating types appropriately.
+
+### Auth API calls extracted into `lib/utils/auth-api.ts` and Auth fixture overreliance removed
+
+Register, login, and delete-account requests started as private helpers inside
+`lib/fixtures/auth.fixture.ts`. The login spec was using the auth fixture's credentials, but
+overriding its session handling. These API requests are now extracted into `lib/utils/auth-api.ts`
+and used directly where applicable.
