@@ -1,10 +1,7 @@
-import {
-  test as base,
-  type APIRequestContext,
-  type BrowserContextOptions,
-} from '@playwright/test';
+import { test as base, type BrowserContextOptions } from '@playwright/test';
 import { BASE_URL } from '../config';
-import { createUser, type GeneratedUser, type UserCredentials } from '../data/user';
+import { createUser, type GeneratedUser } from '../data/user';
+import { deleteAccount, login, register } from '../utils/auth-api';
 
 /** The in-memory form of a storage state (not a file path). */
 type StorageState = Exclude<BrowserContextOptions['storageState'], string | undefined>;
@@ -14,49 +11,6 @@ export interface AuthSession {
   account: GeneratedUser;
   /** Cookies captured after logging in; assignable to `use.storageState`. */
   storageState: StorageState;
-}
-
-/** Register a real account through the API. */
-async function register(request: APIRequestContext, account: GeneratedUser): Promise<void> {
-  const response = await request.post('/api/createAccount', {
-    form: account,
-  });
-  const body = (await response.json()) as { responseCode: number; message: string };
-
-  if (body.responseCode !== 201) {
-    throw new Error(`Could not register ${account.email}: ${JSON.stringify(body)}`);
-  }
-}
-
-/**
- * Log in through the site's form endpoint.
- *
- * The site is CSRF-protected and has no login API (verifyLogin is stateless),
- * so we fetch the login page, replay its token, then check that the response
- * established a session cookie.
- */
-async function login(request: APIRequestContext, account: UserCredentials): Promise<void> {
-  const loginPage = await request.get('/login');
-  const html = await loginPage.text();
-  const csrfToken = /name="csrfmiddlewaretoken" value="([^"]+)"/.exec(html)?.[1];
-
-  if (!csrfToken) {
-    throw new Error('Could not find the CSRF token on the login page.');
-  }
-
-  await request.post('/login', {
-    form: {
-      csrfmiddlewaretoken: csrfToken,
-      email: account.email,
-      password: account.password,
-    },
-    headers: { Referer: `${BASE_URL}/login` },
-  });
-
-  const { cookies } = await request.storageState();
-  if (!cookies.some((cookie) => cookie.name === 'sessionid')) {
-    throw new Error(`Login failed for ${account.email}: no session cookie was set.`);
-  }
 }
 
 /**
@@ -82,11 +36,7 @@ export const test = base.extend<{ storageState: StorageState }, { auth: AuthSess
         await use({ account, storageState });
       } finally {
         // Best-effort cleanup: a leaked test account must not mask a failure.
-        await request
-          .delete('/api/deleteAccount', {
-            form: { email: account.email, password: account.password },
-          })
-          .catch(() => undefined);
+        await deleteAccount(request, account).catch(() => undefined);
         await request.dispose();
       }
     },
