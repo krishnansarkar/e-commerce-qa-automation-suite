@@ -1,6 +1,8 @@
 import { expect } from '@playwright/test';
 import { test } from '../lib/fixtures/adblock.fixture';
+import { BASE_URL } from '../lib/config';
 import { createUser } from '../lib/data/user';
+import { deleteAccount, register } from '../lib/utils/auth-api';
 import { LoginPage } from '../lib/pages/login.page';
 import { SignupPage } from '../lib/pages/signup.page';
 import { AccountCreatedPage } from '../lib/pages/account-created.page';
@@ -73,5 +75,32 @@ test.describe('Signup e2e', () => {
     // 6. The nav bar identifies the newly created account.
     expect(await home.isLoggedIn()).toBe(true);
     expect(await home.loggedInUser()).toBe(name);
+  });
+
+  test('a duplicate email is rejected at the signup form', async ({ page, playwright }) => {
+    const request = await playwright.request.newContext({ baseURL: BASE_URL });
+    const account = createUser();
+
+    try {
+      // Register the email first so the signup form has something to collide with.
+      await register(request, account);
+
+      // 1. Open the login page and submit the "New User Signup!" form with the
+      //    already-registered email.
+      const login = new LoginPage(page);
+      await login.goto();
+      await expect(login.signupHeading).toBeVisible();
+      await login.signup(account.name, account.email);
+
+      // 2. The site re-renders the signup/login page (never the account-info
+      //    page) and reports that the email is taken.
+      await expect(page).toHaveURL(/\/signup$/);
+      await expect(login.signupErrorMessage).toBeVisible();
+      await expect(login.signupHeading).toBeVisible();
+    } finally {
+      // Best-effort cleanup so a leaked account does not mask a failure.
+      await deleteAccount(request, account).catch(() => undefined);
+      await request.dispose();
+    }
   });
 });

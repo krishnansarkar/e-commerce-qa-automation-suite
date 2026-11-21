@@ -28,6 +28,7 @@ export class LoginPage {
   readonly signupNameInput: Locator;
   readonly signupEmailInput: Locator;
   readonly signupButton: Locator;
+  readonly signupErrorMessage: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -49,6 +50,7 @@ export class LoginPage {
     this.signupNameInput = signupForm.getByPlaceholder('Name');
     this.signupEmailInput = signupForm.getByPlaceholder('Email Address');
     this.signupButton = signupForm.getByRole('button', { name: 'Signup' });
+    this.signupErrorMessage = signupForm.getByText('Email Address already exist!');
   }
 
   /** Navigate to the login page. */
