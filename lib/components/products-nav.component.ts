@@ -51,6 +51,11 @@ export class ProductsNavComponent {
     return this.productCards.filter({ has: this.page.getByText(name, { exact: true }) });
   }
 
+  /** The card at a zero-based position in the grid. */
+  cardAt(index: number): Locator {
+    return this.productCards.nth(index);
+  }
+
   /** The name shown on a product's card. */
   productName(name: string): Locator {
     return this.cardFor(name).locator('.productinfo p').first();
@@ -59,6 +64,16 @@ export class ProductsNavComponent {
   /** The price shown on a product's card, e.g. "Rs. 500". */
   productPrice(name: string): Locator {
     return this.cardFor(name).locator('.productinfo h2').first();
+  }
+
+  /** The name shown on the card at a zero-based position. */
+  productNameAt(index: number): Locator {
+    return this.cardAt(index).locator('.productinfo p').first();
+  }
+
+  /** The price shown on the card at a zero-based position, e.g. "Rs. 500". */
+  productPriceAt(index: number): Locator {
+    return this.cardAt(index).locator('.productinfo h2').first();
   }
 
   /**
@@ -109,6 +124,12 @@ export class ProductsNavComponent {
   /** Open a product's details page from its card. */
   async viewProduct(name: string): Promise<void> {
     await this.cardFor(name).getByRole('link', { name: 'View Product' }).click();
+    await this.page.waitForURL(/\/product_details\/\d+$/, { waitUntil: 'domcontentloaded' });
+  }
+
+  /** Open the details page for the card at a zero-based position. */
+  async viewProductAt(index: number): Promise<void> {
+    await this.cardAt(index).getByRole('link', { name: 'View Product' }).click();
     await this.page.waitForURL(/\/product_details\/\d+$/, { waitUntil: 'domcontentloaded' });
   }
 }
