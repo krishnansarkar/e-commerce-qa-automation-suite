@@ -14,6 +14,7 @@ For example, if I say go to target/login, you will go to https://automationexerc
    - `page.getByText()`
    - unique css selector
 3. DO NOT hallucinate selectors. Use `playwright-cli generate-locator` or `playwright-cli snapshot` to find valid elements on the target webpage.
+4. `data-qa` is the site's test-id attribute: locate those elements with `page.getByTestId('...')`, never `page.locator('[data-qa="..."]')`. This works because `playwright.config.ts` sets `testIdAttribute: 'data-qa'`.
 
 ## Test Guidelines
 - Write tests inside the `/tests` folder using semantic role locators.

@@ -100,3 +100,10 @@ Register, login, and delete-account requests started as private helpers inside
 `lib/fixtures/auth.fixture.ts`. The login spec was using the auth fixture's credentials, but
 overriding its session handling. These API requests are now extracted into `lib/utils/auth-api.ts`
 and used directly where applicable.
+
+### `data-qa` hooks read through `getByTestId`
+
+The page objects addressed the site's `data-qa` attributes with raw selectors such as
+`page.locator('[data-qa="zipcode"]')`. I corrected this by configuring `testIdAttribute: 'data-qa'`
+in `playwright.config.ts` and replacing every raw `[data-qa="..."]` selector with
+`page.getByTestId('...')`, so the test hooks now go through Playwright's built-in accessor.

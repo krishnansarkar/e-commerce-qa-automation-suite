@@ -21,11 +21,12 @@ export interface PaymentCard {
  *
  * Notes on the site's markup:
  * - The card inputs have no labels, ids or placeholders for the name and card
- *   number, so `data-qa` is the only stable handle (as on the signup form).
+ *   number, so the site's `data-qa` hooks (accessed with `getByTestId()`) are
+ *   the only stable handle (as on the signup form).
  *   CVC/month/year do have placeholders ("ex. 311", "MM", "YYYY").
  * - Expiry is two plain text inputs, not a date picker, and the values are not
  *   validated client-side.
- * - "Pay and Confirm Order" is a `<button type="submit">` (`data-qa="pay-button"`)
+ * - "Pay and Confirm Order" is a `<button type="submit">` (`getByTestId('pay-button')`)
  *   inside `#payment-form`, which POSTs back to /payment.
  * - The submit may be covered by an AdSense vignette overlay, so the click goes
  *   through `clickAndNavigate()`.
@@ -47,12 +48,12 @@ export class PaymentPage {
 
     this.heading = page.getByRole('heading', { name: 'Payment' });
     this.paymentForm = page.locator('#payment-form');
-    this.nameOnCardInput = page.locator('[data-qa="name-on-card"]');
-    this.cardNumberInput = page.locator('[data-qa="card-number"]');
-    this.cvcInput = page.locator('[data-qa="cvc"]');
-    this.expiryMonthInput = page.locator('[data-qa="expiry-month"]');
-    this.expiryYearInput = page.locator('[data-qa="expiry-year"]');
-    this.payAndConfirmButton = page.locator('[data-qa="pay-button"]');
+    this.nameOnCardInput = page.getByTestId('name-on-card');
+    this.cardNumberInput = page.getByTestId('card-number');
+    this.cvcInput = page.getByTestId('cvc');
+    this.expiryMonthInput = page.getByTestId('expiry-month');
+    this.expiryYearInput = page.getByTestId('expiry-year');
+    this.payAndConfirmButton = page.getByTestId('pay-button');
   }
 
   /**

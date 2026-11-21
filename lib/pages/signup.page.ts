@@ -40,11 +40,11 @@ export interface SignupAddress {
  * - Required fields are labelled with a trailing " *", and Playwright's
  *   `getByLabel()` is substring-based by default, so exact matching keeps
  *   "Name *" from also matching "First name *" and "Last name *".
- * - The date-of-birth <select> elements have no accessible name; `data-qa`
- *   is the only stable handle on them.
+ * - The date-of-birth <select> elements have no accessible name; the site's
+ *   `data-qa` hooks (via `getByTestId()`) are the only stable handle on them.
  * - The "Zipcode *" label's `for` attribute incorrectly points at the city
  *   input, so `getByLabel('Zipcode *')` resolves to the city field. The
- *   zipcode input is addressed via `data-qa` instead.
+ *   zipcode input is addressed via `getByTestId('zipcode')` instead.
  */
 export class SignupPage {
   readonly page: Page;
@@ -91,9 +91,9 @@ export class SignupPage {
     this.nameInput = page.getByLabel('Name *', { exact: true });
     this.emailInput = page.getByLabel('Email *', { exact: true });
     this.passwordInput = page.getByLabel('Password *', { exact: true });
-    this.daySelect = page.locator('[data-qa="days"]');
-    this.monthSelect = page.locator('[data-qa="months"]');
-    this.yearSelect = page.locator('[data-qa="years"]');
+    this.daySelect = page.getByTestId('days');
+    this.monthSelect = page.getByTestId('months');
+    this.yearSelect = page.getByTestId('years');
     this.newsletterCheckbox = page.getByRole('checkbox', { name: 'Sign up for our newsletter!' });
     this.specialOffersCheckbox = page.getByRole('checkbox', {
       name: 'Receive special offers from our partners!',
@@ -108,7 +108,7 @@ export class SignupPage {
     this.countrySelect = page.getByLabel('Country *', { exact: true });
     this.stateInput = page.getByLabel('State *', { exact: true });
     this.cityInput = page.getByLabel('City *', { exact: true });
-    this.zipcodeInput = page.locator('[data-qa="zipcode"]');
+    this.zipcodeInput = page.getByTestId('zipcode');
     this.mobileNumberInput = page.getByLabel('Mobile Number *', { exact: true });
 
     this.createAccountButton = page.getByRole('button', { name: 'Create Account' });
