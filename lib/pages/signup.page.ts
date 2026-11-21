@@ -1,7 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
-
-/** Title options offered by the account form. */
-export type Title = 'Mr.' | 'Mrs.';
+import { Title } from '../data/user';
 
 export interface SignupPersonalDetails {
   title?: Title;
@@ -134,7 +132,7 @@ export class SignupPage {
       await this.daySelect.selectOption(details.day);
     }
     if (details.month) {
-      await this.monthSelect.selectOption({ label: details.month });
+      await this.monthSelect.selectOption(details.month);
     }
     if (details.year) {
       await this.yearSelect.selectOption(details.year);

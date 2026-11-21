@@ -7,6 +7,9 @@
  * collide.
  */
 
+/** Valid title options **/
+export type Title = 'Mr.' | 'Mrs.';
+
 /**
  * Form body accepted by POST /api/createAccount.
  *
@@ -19,8 +22,8 @@
  */
 export type AccountInfo = {
   name: string;
-  title: string;
-  birth_date: string;
+  title: Title;
+  birth_day: string;
   birth_month: string;
   birth_year: string;
   firstname: string;
@@ -39,8 +42,8 @@ export type AccountInfo = {
 export function createAccountInfo(): AccountInfo {
   return {
     name: 'Bogus Tester',
-    title: 'Mrs',
-    birth_date: '15',
+    title: 'Mrs.',
+    birth_day: '15',
     birth_month: '1',
     birth_year: '1990',
     firstname: 'Bogus',

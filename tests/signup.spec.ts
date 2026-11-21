@@ -8,7 +8,8 @@ import { HomePage } from '../lib/pages/home.page';
 
 test.describe('Signup e2e', () => {
   test('a new user can create an account and is logged in on the homepage', async ({ page }) => {
-    const { name, email, password } = createUser();
+    const userInfo = createUser();
+    const { name, email, password } = userInfo;
 
     // 1. Start as a guest on the homepage and open the login page from the header.
     const home = new HomePage(page);
@@ -29,26 +30,26 @@ test.describe('Signup e2e', () => {
     await expect(signup.emailInput).toHaveValue(email);
 
     await signup.fillAccountInformation({
-      title: 'Mrs.',
+      title: userInfo.title,
       password,
-      day: '15',
-      month: 'January',
-      year: '1990',
+      day: userInfo.birth_day,
+      month: userInfo.birth_month,
+      year: userInfo.birth_year,
       newsletter: true,
       specialOffers: true,
     });
 
     await signup.fillAddress({
-      firstName: 'Bogus',
-      lastName: 'Tester',
-      company: 'Bogus Co',
-      address: '1 Fake Street',
-      address2: 'Suite 404',
-      country: 'United States',
-      state: 'California',
-      city: 'Nowhere',
-      zipcode: '90210',
-      mobileNumber: '555-0100',
+      firstName: userInfo.firstname,
+      lastName: userInfo.lastname,
+      company: userInfo.company,
+      address: userInfo.address1,
+      address2: userInfo.address2,
+      country: userInfo.country,
+      state: userInfo.state,
+      city: userInfo.city,
+      zipcode: userInfo.zipcode,
+      mobileNumber: userInfo.mobile_number,
     });
 
     await signup.createAccount();
