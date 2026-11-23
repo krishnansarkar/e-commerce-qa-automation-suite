@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+import { parseAmount } from '../utils/amount';
 
 /** How long a cart click may take to register before it is retried. */
 const CLICK_SETTLE_MS = 5_000;
@@ -79,6 +80,16 @@ export class CartPage {
     return this.rowFor(name).locator('td.cart_price p');
   }
 
+  /** Extract the product name shown in a row. */
+  async getProductName(name: string): Promise<string> {
+    return (await this.productName(name).innerText()).trim();
+  }
+
+  /** Extract the unit price shown in a row as a number, e.g. 500 for "Rs. 500". */
+  async getProductPrice(name: string): Promise<number> {
+    return parseAmount(await this.productPrice(name).innerText());
+  }
+
   /** The quantity shown in a row (read-only on this page). */
   productQuantity(name: string): Locator {
     return this.rowFor(name).locator('td.cart_quantity button');
@@ -87,6 +98,11 @@ export class CartPage {
   /** The row total, i.e. price x quantity. */
   productTotal(name: string): Locator {
     return this.rowFor(name).locator('td.cart_total p');
+  }
+
+  /** Extract the row total, i.e. price x quantity, as a number. */
+  async getProductTotal(name: string): Promise<number> {
+    return parseAmount(await this.productTotal(name).innerText());
   }
 
   /** The row's delete control. */

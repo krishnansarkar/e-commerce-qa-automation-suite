@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+import { parseAmount } from '../utils/amount';
 
 /** How long a cart click may take to register before it is retried. */
 const CLICK_SETTLE_MS = 5_000;
@@ -97,6 +98,19 @@ export class ProductDetailsPage {
     await this.page.goto(`https://automationexercise.com/product_details/${productId}`, {
       waitUntil: 'domcontentloaded',
     });
+  }
+
+  /**
+   * Extract the product's name. The heading wraps parts of the name in links,
+   * whose inline markup leaves extra whitespace, so it is normalized.
+   */
+  async getProductName(): Promise<string> {
+    return (await this.nameHeading.innerText()).replace(/\s+/g, ' ').trim();
+  }
+
+  /** Extract the product's price as a number, e.g. 500 for "Rs. 500". */
+  async getProductPrice(): Promise<number> {
+    return parseAmount(await this.price.innerText());
   }
 
   /** The product id taken from the current /product_details/<id> URL. */
