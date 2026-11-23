@@ -1,0 +1,28 @@
+{
+  "name": "e-commerce-qa-automation-suite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:api": "npx playwright test --project=api",
+    "test:headed": "npx playwright test --headed",
+    "test:report": "npx playwright show-report",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krishnansarkar/e-commerce-qa-automation-suite.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/krishnansarkar/e-commerce-qa-automation-suite/issues"
+  },
+  "homepage": "https://github.com/krishnansarkar/e-commerce-qa-automation-suite#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6",
+    "typescript": "^5.9.3"
+  }
+}
