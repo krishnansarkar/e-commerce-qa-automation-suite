@@ -107,3 +107,13 @@ The page objects addressed the site's `data-qa` attributes with raw selectors su
 `page.locator('[data-qa="zipcode"]')`. I corrected this by configuring `testIdAttribute: 'data-qa'`
 in `playwright.config.ts` and replacing every raw `[data-qa="..."]` selector with
 `page.getByTestId('...')`, so the test hooks now go through Playwright's built-in accessor.
+
+### Cart coverage and typed amount getters
+
+Cart coverage started as assertions written directly in the spec, reading names and prices with
+`innerText()` at each call site and parsing the row total with a local helper. I steered those reads
+into page-object methods: `getProductName`, `getProductPrice`, and `getProductTotal` on `CartPage`,
+plus matching `getProductName`/`getProductPrice` getters on `ProductsPage` and
+`ProductDetailsPage`. I also had `getProductPrice` return a `number` instead of a formatted
+`"Rs. ..."` string, backed by a shared parser in `lib/utils/amount.ts`, so prices are compared as
+amounts and the specs no longer carry rupee formatting or regexes.
