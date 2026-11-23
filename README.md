@@ -28,6 +28,10 @@ The site under
 test is a shared public demo with connection limits, so `playwright.config.ts` caps local workers at 4; CI runs one worker
 with retries.
 
+The Playwright HTML report from pushes to `main` is published to GitHub Pages. Pull requests keep their reports as
+downloadable workflow artifacts. To enable publishing, set the repository's **Settings → Pages → Build and deployment →
+Source** to **GitHub Actions** once.
+
 ## Test layout
 
 ```
