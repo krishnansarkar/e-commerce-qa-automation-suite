@@ -21,10 +21,10 @@ test.describe('Product details', () => {
     const firstCard = products.productsNav.cardAt(0);
     await expect(firstCard).toBeVisible();
 
-    const name = (await products.productsNav.productNameAt(0).innerText()).trim();
-    const price = (await products.productsNav.productPriceAt(0).innerText()).trim();
+    const name = await products.getProductName(0);
+    const price = await products.getProductPrice(0);
     expect(name).not.toBe('');
-    expect(price).toMatch(/^Rs\.\s*[\d,.]+$/);
+    expect(price).toBeGreaterThan(0);
 
     // 3. Follow that card's "View Product" link to its details page.
     await products.productsNav.viewProductAt(0);
@@ -32,8 +32,8 @@ test.describe('Product details', () => {
     // 4. The details page shows the same name and price.
     const details = new ProductDetailsPage(page);
     await expect(page).toHaveURL(/\/product_details\/\d+$/);
-    await expect(details.nameHeading).toHaveText(name);
-    await expect(details.price).toHaveText(price);
+    expect(await details.getProductName()).toBe(name);
+    expect(await details.getProductPrice()).toBe(price);
   });
 });
 
@@ -50,16 +50,17 @@ test.describe('Product search', () => {
     await products.goto();
     await expect(products.heading).toBeVisible();
 
-    const name = (await products.productsNav.productNameAt(0).innerText()).trim();
-    const price = (await products.productsNav.productPriceAt(0).innerText()).trim();
+    const name = await products.getProductName(0);
+    const price = await products.getProductPrice(0);
     expect(name).not.toBe('');
+    expect(price).toBeGreaterThan(0);
 
     // 2. Search for the name shown on that card.
     await products.search(name);
     await expect(products.searchedHeading).toBeVisible();
 
     // 3. The first result is the same card.
-    await expect(products.productsNav.productNameAt(0)).toHaveText(name);
-    await expect(products.productsNav.productPriceAt(0)).toHaveText(price);
+    expect(await products.getProductName(0)).toBe(name);
+    expect(await products.getProductPrice(0)).toBe(price);
   });
 });
