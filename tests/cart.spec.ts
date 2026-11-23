@@ -88,4 +88,35 @@ test.describe('Cart', () => {
     await expect(cart.productQuantity(name)).toHaveText('4');
     expect(await cart.getProductTotal(name)).toBe(price * 4);
   });
+
+  test('removing an item leaves the other products in the cart', async ({ page }) => {
+    const details = new ProductDetailsPage(page);
+
+    // 1. Add two different products from their details pages.
+    const items = [];
+    for (const id of [1, 2]) {
+      await details.goto(id);
+      items.push({
+        name: await details.getProductName(),
+        price: await details.getProductPrice(),
+      });
+      await details.addToCart();
+    }
+
+    const cart = new CartPage(page);
+    await cart.goto();
+    await expect(cart.cartRows).toHaveCount(2);
+
+    // 2. Remove the first product and check its row is gone while the second
+    //    product's row keeps its name, price, quantity and total.
+    const [removed, remaining] = items;
+    await cart.removeProduct(removed.name);
+
+    await expect(cart.cartRows).toHaveCount(1);
+    await expect(cart.rowFor(removed.name)).toHaveCount(0);
+    expect(await cart.getProductName(remaining.name)).toBe(remaining.name);
+    expect(await cart.getProductPrice(remaining.name)).toBe(remaining.price);
+    await expect(cart.productQuantity(remaining.name)).toHaveText('1');
+    expect(await cart.getProductTotal(remaining.name)).toBe(remaining.price);
+  });
 });
