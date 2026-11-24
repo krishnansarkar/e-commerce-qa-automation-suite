@@ -1,9 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { parseAmount } from '../utils/amount';
 
-/** How long a cart click may take to register before it is retried. */
-const CLICK_SETTLE_MS = 5_000;
-
 /** Review details accepted by the "Write Your Review" form. */
 export interface ProductReview {
   name: string;
@@ -29,8 +26,7 @@ export interface ProductReview {
  *   than its full text.
  * - "Add to cart" is a `<button class="btn btn-default cart">` whose handler
  *   comes from /static/js/cart.js. The handler reads `#quantity` and the hidden
- *   `#product_id` and POSTs to /add_to_cart/<id>; the same cart.js race as on
- *   the listing pages applies, so the click is retried when nothing happened.
+ *   `#product_id` and POSTs to /add_to_cart/<id>.
  * - On success the shared "Added!" modal (`#cartModal`) appears, with a "View
  *   Cart" link and a "Continue Shopping" button.
  * - The review form is handled entirely client-side: submitting reveals
@@ -128,45 +124,15 @@ export class ProductDetailsPage {
   }
 
   /**
-   * Add this product to the cart and wait for the "Added!" modal.
-   *
-   * The click handler comes from cart.js, which can still be running after
-   * `domcontentloaded`; a click in that window does nothing at all. Each click
-   * therefore races its /add_to_cart/<id> request against the modal appearing
-   * and is repeated only when neither happened.
+   * Add this product to the cart. The shared "Added!" modal is left open for
+   * the caller to dismiss with `continueShopping()`.
    */
   async addToCart(quantity?: number): Promise<void> {
     if (quantity !== undefined) {
       await this.setQuantity(quantity);
     }
 
-    // The modal covers the page, so it must be dismissed before clicking.
-    await this.addedToCartModal.waitFor({ state: 'hidden' });
-
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const requestSent = this.page
-        .waitForRequest(/\/add_to_cart\/\d+/, { timeout: CLICK_SETTLE_MS })
-        .then(() => true)
-        .catch(() => false);
-      const modalShown = this.addedToCartModal
-        .waitFor({ state: 'visible', timeout: CLICK_SETTLE_MS })
-        .then(() => true)
-        .catch(() => false);
-
-      await this.addToCartButton.click();
-
-      const registered = await Promise.race([
-        requestSent,
-        modalShown,
-        this.page.waitForTimeout(CLICK_SETTLE_MS).then(() => false),
-      ]);
-
-      if (registered) {
-        break;
-      }
-    }
-
-    await this.addedToCartModal.waitFor({ state: 'visible' });
+    await this.addToCartButton.click();
   }
 
   /** Dismiss the "Added!" modal with its "Continue Shopping" button. */

@@ -1,9 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { parseAmount } from '../utils/amount';
 
-/** How long a cart click may take to register before it is retried. */
-const CLICK_SETTLE_MS = 5_000;
-
 /**
  * Page object for https://automationexercise.com/view_cart
  *
@@ -110,43 +107,12 @@ export class CartPage {
     return this.rowFor(name).locator('.cart_quantity_delete');
   }
 
-  /**
-   * Delete a product from the cart. Deletion is an AJAX call that removes the
-   * row; deleting the last row reveals the empty-cart message.
-   *
-   * As with adding to cart, the handler comes from cart.js and can be bound
-   * after `domcontentloaded`. Each click races its /delete_cart/<id> request
-   * against the row disappearing and is repeated only when neither happened.
-   */
+  /** Delete a product from the cart and wait for its row to disappear. */
   async removeProduct(name: string): Promise<void> {
     const row = this.rowFor(name);
-
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const requestSent = this.page
-        .waitForRequest(/\/delete_cart\/\d+/, { timeout: CLICK_SETTLE_MS })
-        .then(() => true)
-        .catch(() => false);
-      const rowRemoved = row
-        .waitFor({ state: 'detached', timeout: CLICK_SETTLE_MS })
-        .then(() => true)
-        .catch(() => false);
-
-      await this.deleteButton(name).click();
-
-      const registered = await Promise.race([
-        requestSent,
-        rowRemoved,
-        this.page.waitForTimeout(CLICK_SETTLE_MS).then(() => false),
-      ]);
-
-      if (registered) {
-        break;
-      }
-    }
-
+    await this.deleteButton(name).click();
     await row.waitFor({ state: 'detached' });
   }
-
 
   async proceedToCheckout(): Promise<void> {
     await this.proceedToCheckoutButton.click()
