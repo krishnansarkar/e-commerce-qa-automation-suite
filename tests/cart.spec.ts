@@ -28,6 +28,7 @@ test.describe('Cart', () => {
 
     // 2. Add it to the cart, then do the same for the second product.
     await details.addToCart();
+    await details.continueShopping();
 
     await details.goto(2);
     const second = {
@@ -38,6 +39,7 @@ test.describe('Cart', () => {
     expect(second.price).toBeGreaterThan(0);
 
     await details.addToCart();
+    await details.continueShopping();
 
     // 3. The cart lists exactly the two products, each with the name and price
     //    recorded above, a quantity of one, and a total equal to the price.
@@ -66,6 +68,7 @@ test.describe('Cart', () => {
 
     // 2. Add two of it and check the single cart row reflects both.
     await details.addToCart(2);
+    await details.continueShopping();
 
     const cart = new CartPage(page);
     await cart.goto();
@@ -80,6 +83,7 @@ test.describe('Cart', () => {
     //    than creating a second one, so the quantity and total both double.
     await details.goto(1);
     await details.addToCart(2);
+    await details.continueShopping();
 
     await cart.goto();
     await expect(cart.cartRows).toHaveCount(1);
@@ -101,6 +105,7 @@ test.describe('Cart', () => {
         price: await details.getProductPrice(),
       });
       await details.addToCart();
+      await details.continueShopping();
     }
 
     const cart = new CartPage(page);
