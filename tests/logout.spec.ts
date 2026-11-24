@@ -1,43 +1,60 @@
-import { expect, mergeTests } from '@playwright/test';
-import { test as authTest } from '../lib/fixtures/auth.fixture';
-import { test as adBlockTest } from '../lib/fixtures/adblock.fixture';
+import { expect } from '@playwright/test';
+import { test } from '../lib/fixtures/adblock.fixture';
+import { BASE_URL } from '../lib/config';
+import { createUser } from '../lib/data/user';
+import { deleteAccount, login, register } from '../lib/utils/auth-api';
 import { HomePage } from '../lib/pages/home.page';
 import { LoginPage } from '../lib/pages/login.page';
 
 /**
  * Logout e2e.
  *
- * The auth fixture registers a real account per worker and signs the worker's
- * browser context in, so the test starts from a signed-in homepage. Logging out
- * invalidates that worker's session, so this flow lives in its own spec rather
- * than sharing a file with tests that need the fixture's session. Ads are
- * blocked so the site's overlays cannot cover the header.
+ * Logging out ends the account's session server-side, so this spec must not use
+ * the worker-scoped auth fixture: every later test in the same worker would
+ * then run signed out (this made purchase.spec.ts flaky). Instead the test
+ * registers a throwaway account, signs in through the auth API and copies that
+ * session into the browser context. The account is deleted in `finally`. Ads
+ * are blocked so the site's overlays cannot cover the header.
  */
-const test = mergeTests(authTest, adBlockTest);
-
 test.describe('Logout e2e', () => {
-  test('a signed-in user can log out', async ({ page, auth }) => {
-    // 1. The auth fixture's storage state signs this context in, so the
-    //    homepage opens with the signed-in header.
-    const home = new HomePage(page);
-    await home.goto();
-    await expect(home.loggedInAs).toContainText(`Logged in as ${auth.account.name}`);
-    await expect(home.logoutLink).toBeVisible();
-    await expect(home.signupLoginLink).toHaveCount(0);
-    expect(await home.isLoggedIn()).toBe(true);
+  test.use({ storageState: { cookies: [], origins: [] } });
 
-    // 2. "Logout" ends the session and returns the user to the login page.
-    await home.logout();
-    await expect(page).toHaveURL(/\/login$/);
-    const login = new LoginPage(page);
-    await expect(login.loginHeading).toBeVisible();
-    await expect(login.loggedInAs).toHaveCount(0);
+  test('a signed-in user can log out', async ({ page, context, playwright }) => {
+    const request = await playwright.request.newContext({ baseURL: BASE_URL });
+    const account = createUser();
 
-    // 3. The session is really gone: the homepage now shows the guest header.
-    await home.goto();
-    await expect(home.signupLoginLink).toBeVisible();
-    await expect(home.logoutLink).toHaveCount(0);
-    await expect(home.loggedInAs).toHaveCount(0);
-    expect(await home.isLoggedIn()).toBe(false);
+    try {
+      await register(request, account);
+      await login(request, account);
+      const { cookies } = await request.storageState();
+      await context.addCookies(cookies);
+
+      // 1. The API session signs this context in, so the homepage opens with
+      //    the signed-in header.
+      const home = new HomePage(page);
+      await home.goto();
+      await expect(home.loggedInAs).toContainText(`Logged in as ${account.name}`);
+      await expect(home.logoutLink).toBeVisible();
+      await expect(home.signupLoginLink).toHaveCount(0);
+      expect(await home.isLoggedIn()).toBe(true);
+
+      // 2. "Logout" ends the session and returns the user to the login page.
+      await home.logout();
+      await expect(page).toHaveURL(/\/login$/);
+      const loginPage = new LoginPage(page);
+      await expect(loginPage.loginHeading).toBeVisible();
+      await expect(loginPage.loggedInAs).toHaveCount(0);
+
+      // 3. The session is really gone: the homepage now shows the guest header.
+      await home.goto();
+      await expect(home.signupLoginLink).toBeVisible();
+      await expect(home.logoutLink).toHaveCount(0);
+      await expect(home.loggedInAs).toHaveCount(0);
+      expect(await home.isLoggedIn()).toBe(false);
+    } finally {
+      // Best-effort cleanup: a leaked test account must not mask a failure.
+      await deleteAccount(request, account).catch(() => undefined);
+      await request.dispose();
+    }
   });
 });
