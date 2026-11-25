@@ -44,6 +44,9 @@ lib/
   components/ shared component objects (product cards, add-to-cart modal)
   data/       test data factories (user, payment card)
   utils/      shared helpers
+fixtures/
+  fixtures.ts         the `test` / `authTest` entry point every spec imports
+  retry-logic.fixture.ts  retry delay for the throttled demo site
 ```
 
 Browser specs drive the site through the page objects (`lib/pages`) and their shared components (`lib/components`) rather than raw selectors.
@@ -70,6 +73,21 @@ hosts:
 Everything else is continued untouched. Blocking these removes the AdSense "vignette" overlay and
 Google's consent prompt, which otherwise cover the page and intercept clicks on controls such as
 "Place Order".
+
+### `retry` - `fixtures/retry-logic.fixture.ts`
+
+An auto fixture that waits **5 seconds** before a retried test (`testInfo.retry > 0`) runs; the first
+attempt is untouched. The target is a shared public demo that throttles requests (see
+`playwright.config.ts`), so an immediate retry tends to hit the same queue-full/5xx condition that
+failed the first attempt. The delay gives those limits time to clear.
+
+It is merged into the default `test` exported by `fixtures/fixtures.ts`, so every spec gets it
+without importing anything extra. It only has an effect when retries are enabled: CI sets
+`retries: 2`, while local runs default to `0`, so pass `--retries=N` to exercise it locally.
+
+Note that the delay only spaces out attempts; it does not reset server-side state such as a
+signed-in account's cart. That is why the auth fixture stays opt-in (`authTest`) rather than being
+merged into the default `test`.
 
 ## Improvements:
 
@@ -98,11 +116,11 @@ right before posting it. That meant one logical user was assembled from two unre
 at every call site. I corrected this by combining the factories into a single `lib/data/user.ts`
 and updating types appropriately.
 
-### Auth API calls extracted into `lib/utils/auth-api.ts` and Auth fixture overreliance removed
+### Auth API calls extracted into `lib/utils/account-api.ts` and Auth fixture overreliance removed
 
 Register, login, and delete-account requests started as private helpers inside
 `lib/fixtures/auth.fixture.ts`. The login spec was using the auth fixture's credentials, but
-overriding its session handling. These API requests are now extracted into `lib/utils/auth-api.ts`
+overriding its session handling. These API requests are now extracted into `lib/utils/account-api.ts`
 and used directly where applicable.
 
 ### `data-qa` hooks read through `getByTestId`
