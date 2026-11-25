@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
-import { test } from '../lib/fixtures/adblock.fixture';
+import { test } from '../fixtures/fixtures';
 import { BASE_URL } from '../lib/config';
 import { createUser } from '../lib/data/user';
-import { deleteAccount, register } from '../lib/utils/auth-api';
+import { deleteAccount, register } from '../lib/utils/account-api';
 import { LoginPage } from '../lib/pages/login.page';
 import { SignupPage } from '../lib/pages/signup.page';
 import { AccountCreatedPage } from '../lib/pages/account-created.page';

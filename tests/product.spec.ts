@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from '../lib/fixtures/adblock.fixture';
+import { test } from '../fixtures/fixtures';
 import { ProductDetailsPage } from '../lib/pages/product-details.page';
 import { ProductsPage } from '../lib/pages/products.page';
 

@@ -1,7 +1,7 @@
 import { test as base, type BrowserContextOptions } from '@playwright/test';
 import { BASE_URL } from '../config';
 import { createUser, type GeneratedUser } from '../data/user';
-import { deleteAccount, login, register } from '../utils/auth-api';
+import { deleteAccount, login, register } from '../utils/account-api';
 
 /** The in-memory form of a storage state (not a file path). */
 type StorageState = Exclude<BrowserContextOptions['storageState'], string | undefined>;

@@ -18,8 +18,8 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* Retry twice on CI, once locally */
+  retries: process.env.CI ? 2 : 1,
   /* Opt out of parallel tests on CI. Locally, cap the workers: the suite drives
      a shared demo site that throttles requests when hit with one worker per CPU
      (its queue-full / 5xx pages surface as random timeouts). */
