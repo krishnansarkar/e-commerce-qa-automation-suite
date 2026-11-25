@@ -1,19 +1,12 @@
 import { readFile } from 'node:fs/promises';
-import { expect, mergeTests } from '@playwright/test';
-import { test as authTest } from '../lib/fixtures/auth.fixture';
-import { test as adBlockTest } from '../lib/fixtures/adblock.fixture';
+import { expect } from '@playwright/test';
+import { authTest as test } from '../fixtures/fixtures';
 import { createPaymentCard } from '../lib/data/cards';
 import { HomePage } from '../lib/pages/home.page';
 import { CartPage } from '../lib/pages/cart.page';
 import { CheckoutPage } from '../lib/pages/checkout.page';
 import { PaymentPage } from '../lib/pages/payment.page';
 import { OrderPlacedPage } from '../lib/pages/order-placed.page';
-
-/**
- * Authenticated purchase with ad/tracking requests aborted, so no AdSense
- * overlay can cover "Place Order", "Pay and Confirm Order" or the invoice link.
- */
-const test = mergeTests(authTest, adBlockTest);
 
 test.describe('Purchase e2e', () => {
   test('a signed-in user buys a product and downloads a matching invoice', async ({

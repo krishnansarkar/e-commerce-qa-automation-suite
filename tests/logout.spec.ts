@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from '../lib/fixtures/adblock.fixture';
+import { test } from '../fixtures/fixtures';
 import { BASE_URL } from '../lib/config';
 import { createUser } from '../lib/data/user';
 import { deleteAccount, login, register } from '../lib/utils/account-api';
