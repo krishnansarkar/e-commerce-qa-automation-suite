@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { test } from '../lib/fixtures/adblock.fixture';
 import { BASE_URL } from '../lib/config';
 import { createUser } from '../lib/data/user';
-import { deleteAccount, register } from '../lib/utils/auth-api';
+import { deleteAccount, register } from '../lib/utils/account-api';
 import { HomePage } from '../lib/pages/home.page';
 import { LoginPage } from '../lib/pages/login.page';
 
