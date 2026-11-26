@@ -78,8 +78,9 @@ export async function placeOrderAndVerifyInvoice(
   await expect(checkout.deliveryAddressHeading).toBeVisible();
   await expect(checkout.billingAddressHeading).toBeVisible();
 
-  // Address lines are rendered as plain text, so each expected value is
-  // matched as a substring of the printed list.
+  // Address lines are rendered as plain text. The checkout template appends
+  // the dot to the stored title, so `Title` values carry no trailing dot and
+  // both account creation paths (API and signup form) print "Mrs. <name>".
   const expectedAddressLines = [
     `${account.title}. ${account.firstname} ${account.lastname}`,
     account.company,
