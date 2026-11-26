@@ -1,5 +1,7 @@
 # E-commerce QA Automation Suite
 
+[![Playwright Tests](https://github.com/krishnansarkar/e-commerce-qa-automation-suite/actions/workflows/playwright.yml/badge.svg?branch=main)](https://github.com/krishnansarkar/e-commerce-qa-automation-suite/actions/workflows/playwright.yml)
+
 End-to-end and API test suite for [automationexercise.com](https://automationexercise.com), built with
 [Playwright](https://playwright.dev) and TypeScript.
 
