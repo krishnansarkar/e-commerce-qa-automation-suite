@@ -20,9 +20,11 @@ export { expect } from '@playwright/test';
 export const test = mergeTests(adBlockTest, retryLogicTest);
 
 /**
- * `test` plus the worker-scoped `auth` / `storageState` fixtures, for specs that
- * need to start signed in. Import it from this module instead of composing
- * `mergeTests()` in the spec:
+ * `test` plus the auth fixtures, for specs that need to start signed in. The
+ * worker-scoped `auth` fixture creates and logs in one account per worker and
+ * saves its cookies to `playwright/.auth/`; the test-scoped `storageState`
+ * fixture applies that file to each test's browser context. Import it from
+ * this module instead of composing `mergeTests()` in the spec:
  *
  *     import { authTest as test } from '../fixtures/fixtures';
  */

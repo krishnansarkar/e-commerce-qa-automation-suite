@@ -16,8 +16,6 @@ import { LoginPage } from '../lib/pages/login.page';
  * the site's overlays cannot cover the form.
  */
 test.describe('Login e2e', () => {
-  test.use({ storageState: { cookies: [], origins: [] } });
-
   test('a registered user can log in with valid credentials', async ({ page, playwright }) => {
     const request = await playwright.request.newContext({ baseURL: BASE_URL });
     const account = createUser();
