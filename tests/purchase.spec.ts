@@ -1,95 +1,76 @@
-import { readFile } from 'node:fs/promises';
 import { expect } from '@playwright/test';
-import { authTest as test } from '../fixtures/fixtures';
-import { createPaymentCard } from '../lib/data/cards';
+import { authTest, test } from '../fixtures/fixtures';
+import { BASE_URL } from '../lib/config';
+import { createUser } from '../lib/data/user';
+import { deleteAccount, register } from '../lib/utils/account-api';
 import { HomePage } from '../lib/pages/home.page';
-import { CartPage } from '../lib/pages/cart.page';
-import { CheckoutPage } from '../lib/pages/checkout.page';
-import { PaymentPage } from '../lib/pages/payment.page';
-import { OrderPlacedPage } from '../lib/pages/order-placed.page';
+import { LoginPage } from '../lib/pages/login.page';
+import { addFeaturedProductToCart, placeOrderAndVerifyInvoice } from '../lib/utils/purchase';
 
+// The outer describe only groups the tests; each test picks its own `test`
+// object: `authTest` when it starts signed in, base `test` when it must stay a
+// guest.
 test.describe('Purchase e2e', () => {
-  test('a signed-in user buys a product and downloads a matching invoice', async ({
+  authTest('a signed-in user buys a product and downloads a matching invoice', async ({
     page,
     auth,
   }) => {
     const account = auth.account;
 
-    // 1. Start on the homepage and add the product from its featured grid. Its
-    //    cards share the product component with /products, so the same
-    //    add-to-cart flow works without navigating away.
+    // 1-2. Start on the homepage and add the first featured product; the
+    //    helper checks the cart lists one unit at that card's price.
     const home = new HomePage(page);
     await home.goto();
 
-    await home.productsNav.addToCart('Blue Top');
-    await home.productsNav.continueShopping();
+    const { name, cart, cartTotal } = await addFeaturedProductToCart(home);
 
-    // 2. Cart: the product is there and the total is correct. Keep the total;
-    //    the invoice must report the same amount.
-    await home.cartLink.click();
-    const cart = new CartPage(page);
-    await expect(page).toHaveURL(/\/view_cart$/);
-    await expect(cart.cartRows).toHaveCount(1);
-    await expect(cart.productName('Blue Top')).toHaveText('Blue Top');
-    await expect(cart.productQuantity('Blue Top')).toHaveText('1');
+    // 3-5. Check out, pay with bogus card details and verify the invoice.
+    await placeOrderAndVerifyInvoice(cart, { account, product: name, cartTotal });
+  });
 
-    const cartTotal = (await cart.productTotal('Blue Top').innerText()).trim();
-    expect(cartTotal).toBe('Rs. 500');
+  test('a guest buys a product after signing in from the cart prompt', async ({ page, playwright }) => {
+    const request = await playwright.request.newContext({ baseURL: BASE_URL });
+    const account = createUser();
 
-    // 3. Checkout: delivery and billing addresses are the account's, and the
-    //    review shows the same product and total.
-    await cart.proceedToCheckout();
-    const checkout = new CheckoutPage(page);
-    await expect(page).toHaveURL(/\/checkout$/);
-    await expect(checkout.deliveryAddressHeading).toBeVisible();
-    await expect(checkout.billingAddressHeading).toBeVisible();
+    try {
+      await register(request, account);
 
-    const expectedAddressLines = [
-      `${account.title}. ${account.firstname} ${account.lastname}`,
-      account.company,
-      account.address1,
-      account.address2,
-      `${account.city} ${account.state} ${account.zipcode}`,
-      account.country,
-      account.mobile_number,
-    ];
-    for (const address of [checkout.deliveryAddress, checkout.billingAddress]) {
-      for (const line of expectedAddressLines) {
-        await expect(address).toContainText(line);
-      }
+      // 1-2. Same start as the signed-in purchase, but as a guest: the header
+      //    has no logged-in links, and the product is added from the homepage.
+      const home = new HomePage(page);
+      await home.goto();
+      await expect(home.signupLoginLink).toBeVisible();
+      await expect(home.loggedInAs).toHaveCount(0);
+
+      const { name, cart, cartTotal } = await addFeaturedProductToCart(home);
+
+      // 3. A guest cannot check out: "Proceed To Checkout" opens the sign-in
+      //    prompt instead of the checkout page.
+      await cart.openGuestCheckoutPrompt();
+
+      // 4. "Register / Login" opens the login page; sign in with the existing
+      //    account, which returns to the homepage in the signed-in state.
+      await cart.openLoginFromCheckoutPrompt();
+      const login = new LoginPage(page);
+      await expect(login.loginHeading).toBeVisible();
+      await login.login(account.email, account.password);
+      await expect(page).toHaveURL(/^https:\/\/automationexercise\.com\/$/);
+      await expect(home.loggedInAs).toContainText(`Logged in as ${account.name}`);
+
+      // 5. The guest cart survived sign-in, so the same product and total are
+      //    still there for the account to check out.
+      await home.cartLink.click();
+      await expect(page).toHaveURL(/\/view_cart$/);
+      await expect(cart.cartRows).toHaveCount(1);
+      await expect(cart.productName(name)).toHaveText(name);
+      expect(await cart.getCartTotal(name)).toBe(cartTotal);
+
+      // 6-8. Checkout as the account, pay and verify the invoice.
+      await placeOrderAndVerifyInvoice(cart, { account, product: name, cartTotal });
+    } finally {
+      // Best-effort cleanup: a leaked test account must not mask a failure.
+      await deleteAccount(request, account).catch(() => undefined);
+      await request.dispose();
     }
-
-    await expect(checkout.productName('Blue Top')).toHaveText('Blue Top');
-    await expect(checkout.totalAmount).toHaveText(cartTotal);
-
-    // 4. Place the order and pay with bogus card details.
-    await checkout.placeOrder();
-    await expect(page).toHaveURL(/\/payment$/);
-
-    const payment = new PaymentPage(page);
-    await payment.payAndConfirm(createPaymentCard());
-    const done = new OrderPlacedPage(page);
-    await expect(page).toHaveURL(/\/payment_done\/\d+$/);
-    await expect(done.heading).toBeVisible();
-    await expect(done.confirmationMessage).toBeVisible();
-
-    // 5. Download the invoice and check its greeting and amount. The invoice
-    //    greets the customer by first and last name (not the account's display
-    //    name) and prints the amount without the "Rs." prefix.
-    const [download] = await Promise.all([
-      page.waitForEvent('download'),
-      done.downloadInvoiceLink.click(),
-    ]);
-
-    expect(await download.failure()).toBeNull();
-    expect(download.suggestedFilename()).toBe('invoice.txt');
-
-    const invoicePath = await download.path();
-    expect(invoicePath).not.toBeNull();
-    const invoice = await readFile(invoicePath as string, 'utf8');
-
-    const invoiceAmount = cartTotal.replace(/\D/g, '');
-    expect(invoice).toContain(`Hi ${account.firstname} ${account.lastname},`);
-    expect(invoice).toContain(`Your total purchase amount is ${invoiceAmount}`);
   });
 });

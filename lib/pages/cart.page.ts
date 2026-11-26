@@ -102,6 +102,11 @@ export class CartPage {
     return parseAmount(await this.productTotal(name).innerText());
   }
 
+  /** Extract the cart total for a product's row as a number, e.g. 500. */
+  async getCartTotal(name: string): Promise<number> {
+    return this.getProductTotal(name);
+  }
+
   /** The row's delete control. */
   deleteButton(name: string): Locator {
     return this.rowFor(name).locator('.cart_quantity_delete');
@@ -114,8 +119,37 @@ export class CartPage {
     await row.waitFor({ state: 'detached' });
   }
 
+  /**
+   * Click "Proceed To Checkout" as a signed-in user and land on /checkout.
+   *
+   * The control is a href-less anchor whose click handler the site registers
+   * in inline JS at the end of the page, so the click is only sent once the
+   * page has fully loaded; otherwise it can land before the handler exists and
+   * be silently ignored.
+   */
   async proceedToCheckout(): Promise<void> {
-    await this.proceedToCheckoutButton.click()
+    await this.page.waitForLoadState('load');
+    await this.proceedToCheckoutButton.click();
+    await this.page.waitForURL(/\/checkout$/);
+  }
+
+  /**
+   * Click "Proceed To Checkout" as a guest. The site answers with the
+   * `#checkoutModal` sign-in prompt instead of going to /checkout.
+   */
+  async openGuestCheckoutPrompt(): Promise<void> {
+    await this.page.waitForLoadState('load');
+    await this.proceedToCheckoutButton.click();
+    await this.checkoutModal.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Follow the guest prompt's "Register / Login" link to the login page. The
+   * cart survives the round trip, so the guest can check out once signed in.
+   */
+  async openLoginFromCheckoutPrompt(): Promise<void> {
+    await this.checkoutLoginLink.click();
+    await this.page.waitForURL(/\/login$/);
   }
 
   /** Dismiss the guest checkout prompt with "Continue On Cart". */

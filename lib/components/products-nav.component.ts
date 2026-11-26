@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+import { parseAmount } from '../utils/amount';
 
 /** How long a cart click may take to register before it is retried. */
 const CLICK_SETTLE_MS = 5_000;
@@ -76,15 +77,26 @@ export class ProductsNavComponent {
     return this.cardAt(index).locator('.productinfo h2').first();
   }
 
+  /** Extract the name shown on the card at a zero-based position. */
+  async getProductName(index: number): Promise<string> {
+    return (await this.productNameAt(index).innerText()).trim();
+  }
+
+  /** Extract the price shown on the card at a zero-based position, e.g. 500. */
+  async getProductPrice(index: number): Promise<number> {
+    return parseAmount(await this.productPriceAt(index).innerText());
+  }
+
   /**
-   * Add a product to the cart and wait for the "Added!" modal.
+   * Add the product at a zero-based position to the cart and wait for the
+   * "Added!" modal.
    *
    * Uses the first "Add to cart" anchor of the card (the info block one; the
    * second belongs to the hover overlay). Cart state is server-side and shared
    * by the whole browser context.
    */
-  async addToCart(name: string): Promise<void> {
-    const addButton = this.cardFor(name).locator('.add-to-cart').first();
+  async addToCart(index: number): Promise<void> {
+    const addButton = this.cardAt(index).locator('.add-to-cart').first();
 
     // The modal covers the listing, so it must be dismissed before clicking.
     await this.addedToCartModal.waitFor({ state: 'hidden' });
