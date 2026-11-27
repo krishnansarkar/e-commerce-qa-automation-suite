@@ -116,7 +116,7 @@ export class SignupPage {
 
   /** Select the title radio ("Mr." or "Mrs."). */
   async selectTitle(title: Title): Promise<void> {
-    const radio = title === 'Mr.' ? this.titleMrRadio : this.titleMrsRadio;
+    const radio = title === 'Mr' ? this.titleMrRadio : this.titleMrsRadio;
     await radio.check();
   }
 

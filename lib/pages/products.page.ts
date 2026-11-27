@@ -1,6 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
 import { ProductsNavComponent } from '../components/products-nav.component';
-import { parseAmount } from '../utils/amount';
 
 /** Sidebar category accordions, expanded on demand. */
 export type Category = 'Women' | 'Men' | 'Kids';
@@ -60,15 +59,12 @@ export class ProductsPage {
 
   /** Extract the name shown on the card at a zero-based position. */
   async getProductName(index: number): Promise<string> {
-    return (await this.productsNav.productNameAt(index).innerText()).trim();
+    return this.productsNav.getProductName(index);
   }
 
-  /**
-   * Extract the price shown on the card at a zero-based position as a number,
-   * e.g. 500 for "Rs. 500".
-   */
+  /** Extract the price shown on the card at a zero-based position as a number. */
   async getProductPrice(index: number): Promise<number> {
-    return parseAmount(await this.productsNav.productPriceAt(index).innerText());
+    return this.productsNav.getProductPrice(index);
   }
 
   /**

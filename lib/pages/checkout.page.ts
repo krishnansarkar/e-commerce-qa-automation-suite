@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+import { parseAmount } from '../utils/amount';
 
 /**
  * Page object for https://automationexercise.com/checkout
@@ -85,6 +86,11 @@ export class CheckoutPage {
   /** The line total shown in a review row. */
   productTotal(name: string): Locator {
     return this.rowFor(name).locator('td.cart_total p');
+  }
+
+  /** Extract the order's total amount as a number, e.g. 500 for "Rs. 500". */
+  async getTotalAmount(): Promise<number> {
+    return parseAmount(await this.totalAmount.innerText());
   }
 
   /** Fill the optional "comment about your order" box. */

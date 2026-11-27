@@ -8,7 +8,7 @@
  */
 
 /** Valid title options **/
-export type Title = 'Mr.' | 'Mrs.';
+export type Title = 'Mr' | 'Mrs';
 
 /**
  * Form body accepted by POST /api/createAccount.
@@ -42,7 +42,7 @@ export type AccountInfo = {
 export function createAccountInfo(): AccountInfo {
   return {
     name: 'Bogus Tester',
-    title: 'Mrs.',
+    title: 'Mrs',
     birth_day: '15',
     birth_month: '1',
     birth_year: '1990',

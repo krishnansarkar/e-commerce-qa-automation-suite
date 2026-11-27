@@ -3,7 +3,7 @@
 [![Playwright Tests](https://github.com/krishnansarkar/e-commerce-qa-automation-suite/actions/workflows/playwright.yml/badge.svg?branch=main)](https://github.com/krishnansarkar/e-commerce-qa-automation-suite/actions/workflows/playwright.yml)
 
 End-to-end and API test suite for [automationexercise.com](https://automationexercise.com), built with
-[Playwright](https://playwright.dev) and TypeScript.
+[Playwright](https://playwright.dev), TypeScript, and AI-Assistance.
 
 ## Requirements
 
@@ -78,18 +78,10 @@ Google's consent prompt, which otherwise cover the page and intercept clicks on 
 
 ### `retry` - `fixtures/retry-logic.fixture.ts`
 
-An auto fixture that waits **5 seconds** before a retried test (`testInfo.retry > 0`) runs; the first
-attempt is untouched. The target is a shared public demo that throttles requests (see
-`playwright.config.ts`), so an immediate retry tends to hit the same queue-full/5xx condition that
-failed the first attempt. The delay gives those limits time to clear.
-
-It is merged into the default `test` exported by `fixtures/fixtures.ts`, so every spec gets it
-without importing anything extra. It only has an effect when retries are enabled: CI sets
-`retries: 2`, while local runs default to `0`, so pass `--retries=N` to exercise it locally.
-
-Note that the delay only spaces out attempts; it does not reset server-side state such as a
-signed-in account's cart. That is why the auth fixture stays opt-in (`authTest`) rather than being
-merged into the default `test`.
+An auto fixture that waits **5 seconds * retry number** before a retried test.
+The target is a shared public demo that throttles requests,
+so an immediate retry tends to hit the same queue-full/5xx condition that
+failed the first attempt. The increasing delay gives those limits time to clear.
 
 ## Improvements:
 
@@ -131,6 +123,11 @@ The page objects addressed the site's `data-qa` attributes with raw selectors su
 `page.locator('[data-qa="zipcode"]')`. I corrected this by configuring `testIdAttribute: 'data-qa'`
 in `playwright.config.ts` and replacing every raw `[data-qa="..."]` selector with
 `page.getByTestId('...')`, so the test hooks now go through Playwright's built-in accessor.
+
+### Purchase flows reduced to shared step helpers
+
+The purchase specs had grown into three near-identical copies of the same numbered steps.
+I steered that duplication into two helpers in `lib/utils/purchase.ts`. 
 
 ### Cart coverage and typed amount getters
 
